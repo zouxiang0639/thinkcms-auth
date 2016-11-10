@@ -27,8 +27,6 @@ class Auth
         $this->action       = $this->request->action();
     }
 
-
-
     /**
      * 加载控制器方法
      * @param  string  $name 方法名
@@ -44,7 +42,6 @@ class Auth
 
        return false;
     }
-
 
 
 }
