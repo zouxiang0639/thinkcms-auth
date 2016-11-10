@@ -1,0 +1,20 @@
+{
+    "name": "zouxiang0639/thinkcms-auth",
+    "description": "The ThinkPHP5 thinkcms-auth Package.",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "zouxiang",
+            "email": "542506511@qq.com"
+        }
+    ],
+    "require-dev": {
+        "zouxiang0639/thinkcms-auth": "dev-master"
+    },
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "thinkcms\\auth\\": ""
+        }
+    }
+}
