@@ -109,6 +109,9 @@ class Rbac
         return [VIEW_PATH.'menuAdd.php',array_merge($this->data,['info'=>$info])];
     }
 
+    /**
+     * 菜单and权限 删除
+     */
     public function menuDelete(){
         if($this->request->isPost()){
             $id       = intval($this->param['id']);
@@ -129,6 +132,23 @@ class Rbac
         return ['code'=>0,'msg'=>'请求方式错误'];
     }
 
+    /**
+     * 菜单 排序
+     */
+    public function menuOrder(){
+        if($this->request->isPost()) {
+            $id = intval($this->param['id']);
+            $order = intval($this->param['order']);
+            $result = Menu::get($id);
+            if ($result) {
+                if ($result->save(['list_order' => $order])) {
+                    return ['code' => 1, 'msg' => '数据已更新'];
+                }
+            }
+            return ['code'=>0,'msg'=>'数据无变化'];
+        }
+        return ['code'=>0,'msg'=>'请求方式错误'];
+    }
     /**
      * 角色列表
      */

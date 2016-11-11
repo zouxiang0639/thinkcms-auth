@@ -3,7 +3,7 @@
     <li class="active"><a href="{:Url('auth/menu')}">后台菜单</a></li>
     <li><a href="{:Url('auth/menuAdd')}">增加菜单</a></li>
 </ul>
-<form class="js-ajax-form" action="{:Url('auth/menListOrders')}" method="post">
+<form class="js-ajax-form" action="{:Url('auth/menuOrder')}" method="post">
 
     <table class="table table-hover table-bordered table-list" id="menus-table">
         <thead>
@@ -22,5 +22,5 @@
     </table>
 
 </form>
-<input type="hidden" value="{:Url('auth/menListOrders')}" class="menListOrders">
+<input type="hidden" value="{:Url('auth/menuOrder')}" class="listOrderUrl">
 <?php require $pach . 'public/foot.php';?>
