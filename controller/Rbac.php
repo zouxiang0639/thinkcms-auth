@@ -4,7 +4,6 @@
 namespace thinkcms\auth\controller;
 
 
-use app\common\model\UserModel;
 use think\Validate;
 use thinkcms\auth\library\Tree;
 use thinkcms\auth\model\AuthAccess;
@@ -210,6 +209,25 @@ class Rbac
         return [VIEW_PATH.'roleAdd.php',$this->data];
     }
 
+    public function roleDelete(){
+        if($this->request->isPost()){
+            $id       = intval($this->param['id']);
+            $result   = AuthRole::get($id);
+
+            if($id==1){
+                return ['code'=>0,'msg'=>'超级管理员不可删除'];
+            }else if(empty($result)){
+                return ['code'=>0,'msg'=>'没有数据'];
+            }
+
+            if($result->authRoleDelete()){
+                return ['code'=>1,'msg'=>'删除成功','url'=>url('auth/role')];
+            }else{
+                return ['code'=>0,'msg'=>'删除失败'];
+            }
+        }
+        return ['code'=>0,'msg'=>'请求方式错误'];
+    }
     /**
      * 角色授权
      */
@@ -274,7 +292,7 @@ class Rbac
             $menu[$n]['level']    = $tree->get_level($t['id'], $menu);
             $menu[$n]['width']    = 100-$menu[$n]['level'];
         }
-        
+
         $tree->init($menu);
         $tree->text =[
             'other' => "<label class='checkbox' data-original-title='' data-toggle=''>
@@ -317,14 +335,12 @@ class Rbac
 
 /**
  * 所有后台菜单
- * @param array  $selected      默认id
- * @param bool  $cid            类型id
- * @param bool  $parentid       父级id
+ * @param int   $selected       默认id
  * @return mixed
  */
-function menu($selected = '1',$where=''){
+function menu($selected = 1){
 
-    $result = Menu::where($where)->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
+    $result = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
 
     $tree = new Tree();
     foreach ($result as $r) {

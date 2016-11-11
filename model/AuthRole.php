@@ -12,6 +12,21 @@ class AuthRole extends \think\Model
     {
 
     }
+    public function authAccess()
+    {
+        return $this->hasMany('AuthAccess','role_id','id');
+    }
+
+    public function authRoleDelete(){
+        if($this->delete()){
+            if($this->authAccess){
+                AuthAccess::where(['role_id'=>$this->id])->delete();
+            }
+            return true;
+        }
+        return false;
+
+    }
 
 }
 ?>

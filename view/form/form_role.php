@@ -30,10 +30,8 @@
 </div>
 
 <div class="form-actions">
-    <a class="col-lg-2"> </a>
     <button type="button" class="btn btn-primary ajax-post " autocomplete="off">
         保存
     </button>
-    <input type="submit">
     <a class="btn btn-default active" onclick="history.go(-1)">返回</a>
 </div>

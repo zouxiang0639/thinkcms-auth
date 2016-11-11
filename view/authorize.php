@@ -60,11 +60,11 @@
             </table>
         </div>
         <div class="form-actions">
-            <!-- <button class="btn btn-primary" type="submit">保存</button>-->
+
             <button type="button" class="btn btn-primary ajax-post " autocomplete="off">
                 保存
             </button>
-            <a class="btn" href="{:Url('rbac/index')}">返回</a>
+            <a class="btn" href="JavaScript:history.go(-1)">返回</a>
         </div>
     </form>
 </div>

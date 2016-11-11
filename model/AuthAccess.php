@@ -13,6 +13,5 @@ class AuthAccess extends \think\Model
 
     }
 
-
 }
 ?>
