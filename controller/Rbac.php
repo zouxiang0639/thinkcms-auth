@@ -13,7 +13,7 @@ use thinkcms\auth\model\Menu;
 class Rbac
 {
 
-    public $menuValidate    = ['name|名称'=>'require','app|应用'=>'require','model|控制器'=>'require','action|方法'=>'require'];
+    public $menuValidate    = ['name|名称'=>'require' , 'app|应用'=>'require' , 'model|控制器'=>'require' , 'action|方法'=>'require'];
     public $roleValidate    = ['name|角色名称'  => 'require'];
 
     public function __construct($request)
@@ -234,7 +234,7 @@ class Rbac
     public function authorize(){
 
         $roleid     = intval($this->param['id']);
-        $menu     = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
+        $menu       = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
 
         if($this->request->isPost()){//表单处理
 
@@ -273,12 +273,8 @@ class Rbac
                     }
                 }
 
-
-
             }else{
-                //当没有数据时，清除当前角色授权
-                return Db::name(self::$authAccessTable)->where(["role_id" => $roleid])->delete();
-                return $this->error("没有接收到数据，执行清除授权成功！");
+                return ['code'=>0,'msg'=>'没有接收到数据，执行清除授权成功！'];
             }
         }//表单处理结束
 
