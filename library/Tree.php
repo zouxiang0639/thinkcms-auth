@@ -8,23 +8,24 @@ namespace thinkcms\auth\library;
  */
 class Tree
 {
-
+    public $text,$html;
     /**
      * 生成树型结构所需要的2维数组
      * @var array
      */
-    public $arr = array();
+    public $arr     = array();
 
     /**
      * 生成树型结构所需修饰符号，可以换成图片
      * @var array
      */
-    public $icon = array('│', '├', '└');
-    public $nbsp = "&nbsp;";
+    public $icon    = array('│', '├', '└');
+    public $nbsp    = "&nbsp;";
     /**
      * @access private
      */
-    public $ret = '';
+    public $ret     = '';
+
 
     /**
      * 构造函数，初始化类
@@ -82,6 +83,40 @@ class Tree
         return $this->ret;
     }
 
+    public function get_authTree($myid){
+        $id     = '';
+        $nstr   = '';
+        $child = $this->get_child($myid);
+        if (is_array($child)) {
+            $level = current($child);
+
+            $text  = isset($this->text[$level['level']]) ? $this->text[$level['level']] : end($this->text);
+
+            foreach($child as $k=>$v){
+                @extract($v);
+
+                if($this->get_child($id)){
+                    eval("\$nstr = \"$text[0]\";");
+                    $this->html .=  $nstr;
+
+                    self::get_authTree($id);
+
+                    eval("\$nstr = \"$text[1]\";");
+                    $this->html .=  $nstr;
+                }else{
+                    $a = $this->text['other'];
+                    eval("\$nstr = \"$a\";");
+
+                    $this->html .= $nstr;
+                }
+
+
+            }
+
+        }
+        return $this->html;
+    }
+
     /**
      * 得到子级数组
      * @param int
@@ -97,6 +132,8 @@ class Tree
         }
         return $newarr ? $newarr : false;
     }
+
+
 
     /**
      * 递归获取级别

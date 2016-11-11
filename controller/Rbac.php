@@ -4,8 +4,10 @@
 namespace thinkcms\auth\controller;
 
 
+use app\common\model\UserModel;
 use think\Validate;
 use thinkcms\auth\library\Tree;
+use thinkcms\auth\model\AuthAccess;
 use thinkcms\auth\model\AuthRole;
 use thinkcms\auth\model\Menu;
 
@@ -208,6 +210,109 @@ class Rbac
         return [VIEW_PATH.'roleAdd.php',$this->data];
     }
 
+    /**
+     * 角色授权
+     */
+    public function authorize(){
+
+        $roleid     = intval($this->param['id']);
+        $menu     = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
+
+        if($this->request->isPost()){//表单处理
+
+            $post   = $this->post;
+            $menuid = $post['menuid'];
+
+            if(empty($roleid)){
+                return ['code'=>0,'msg'=>'需要授权的角色不存在'];
+            }
+
+            if (is_array($menuid) && count($menuid)>0) {
+
+                AuthAccess::where(["role_id" => $roleid,'type'=>'admin_url'])->delete();
+
+                foreach ($menuid as $v) {
+
+                    $menus   = isset($menu[$v])?$menu[$v]:'';
+
+                    if($menus){
+                        $name   = strtolower("{$menus['app']}/{$menus['model']}/{$menus['action']}");
+                        $data[]   = [
+                            "role_id"   => $roleid,
+                            "rule_name" => $name,
+                            'type'      => 'admin_url',
+                            'menu_id'   => $v
+                        ];
+                    }
+                }
+
+                if(!empty($data)){
+                    $AuthAccess = new AuthAccess();
+                    if($AuthAccess->saveAll($data)){
+                        return ['code'=>1,'msg'=>'增加成功','url'=>url('auth/role')];
+                    }else{
+                        return ['code'=>0,'msg'=>'增加失败'];
+                    }
+                }
+
+
+
+            }else{
+                //当没有数据时，清除当前角色授权
+                return Db::name(self::$authAccessTable)->where(["role_id" => $roleid])->delete();
+                return $this->error("没有接收到数据，执行清除授权成功！");
+            }
+        }//表单处理结束
+
+
+        $priv_data  = AuthAccess::where(["role_id"=>$roleid])->field("rule_name")->column('menu_id');
+
+
+        $tree       = new Tree();
+        foreach ($menu as $n => $t) {
+            $menu[$n]['checked']  = (in_array($t['id'], $priv_data)) ? ' checked' : '';
+            $menu[$n]['level']    = $tree->get_level($t['id'], $menu);
+            $menu[$n]['width']    = 100-$menu[$n]['level'];
+        }
+        
+        $tree->init($menu);
+        $tree->text =[
+            'other' => "<label class='checkbox' data-original-title='' data-toggle=''>
+                        <input \$checked name='menuid[]' value='\$id' level='\$level' onclick='javascript:checknode(this);'type='checkbox'>
+                        \$name
+                   </label>",
+            '0' => [
+            '0' =>"<dl class='checkmod'>
+                    <dt class='hd'>
+                        <label class='checkbox' data-original-title='' data-toggle='tooltip'>
+                            <input \$checked name='menuid[]' value='\$id' level='\$level' onclick='javascript:checknode(this);'
+                             type='checkbox'>
+                            \$name
+                        </label>
+                    </dt>
+                    <dd class='bd'>",
+            '1' => "</dd></dl>",
+            ],
+            '1' => [
+            '0' => "
+                        <div class='menu_parent'>
+                            <label class='checkbox' data-original-title='' data-toggle='tooltip'>
+                                <input \$checked name='menuid[]' value='\$id' level='\$level'
+                                onclick='javascript:checknode(this);' type='checkbox'> \$name
+                            </label>
+                        </div>
+                        <div class='rule_check' style='width: \$width%;'>",
+
+            '1' => "</div><span class='child_row'></span>",
+            ]
+
+        ];
+
+        $info['html']   = $tree->get_authTree(0);
+        $info['id']     = $roleid;
+
+        return [VIEW_PATH.'authorize.php',array_merge($this->data,['info'=>$info])];
+    }
 }
 
 /**
