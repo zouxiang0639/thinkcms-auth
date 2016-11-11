@@ -34,5 +34,15 @@ class AuthRule extends \think\Model
        }
        return false;
     }
+
+    public function authRuleDelete(){
+        if($this->delete()){
+            if($this->authAccess){
+                AuthAccess::where(['menu_id'=>$this->menu_id])->delete();
+            }
+            return true;
+        }
+        return false;
+    }
 }
 ?>

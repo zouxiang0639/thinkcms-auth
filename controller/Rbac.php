@@ -99,15 +99,36 @@ class Rbac
             }
             $menu   = new Menu();
             if($menu->menuAdd($post)){
-                return ['code'=>1,'msg'=>'修改成功','url'=>url('auth/menu')];
+                return ['code'=>1,'msg'=>'增加成功','url'=>url('auth/menu')];
             }else{
-                return ['code'=>0,'msg'=>'修改失败'];
+                return ['code'=>0,'msg'=>'增加失败'];
             }
         }
 
         $info['selectCategorys']  = menu($parent_id);
         return [VIEW_PATH.'menuAdd.php',array_merge($this->data,['info'=>$info])];
     }
+
+    public function menuDelete(){
+        if($this->request->isPost()){
+            $id       = intval($this->param['id']);
+            $result   = Menu::get($id);
+
+            if(empty($result)){
+                return ['code'=>0,'msg'=>'没有数据'];
+            }else if(Menu::where(['parent_id'=>$result['id']])->find()){
+                return ['code'=>0,'msg'=>'有子目录不可删除'];
+            };
+
+            if($result->menuDelete($id)){
+                return ['code'=>1,'msg'=>'删除成功','url'=>url('auth/menu')];
+            }else{
+                return ['code'=>0,'msg'=>'删除失败'];
+            }
+        }
+        return ['code'=>0,'msg'=>'请求方式错误'];
+    }
+
     /**
      * 角色列表
      */

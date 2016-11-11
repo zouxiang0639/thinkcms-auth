@@ -62,8 +62,6 @@ class Menu extends \think\Model
      * @return bool
      */
     public function menuAdd($param){
-
-
         if($auth = $this->create($param)){
 
             $name   = strtolower("{$auth->data['app']}/{$auth->data['model']}/{$auth->data['action']}");
@@ -83,5 +81,19 @@ class Menu extends \think\Model
         return false;
     }
 
+    /**
+     * 关联 authRule模型 删除
+     * @param int     $id   参数
+     * @return bool
+     */
+    public function menuDelete(){
+        if($this->delete()){
+            if($this->authRule){
+                $this->authRule->authRuleDelete();
+            }
+            return true;
+        }
+        return false;
+    }
 }
 ?>
