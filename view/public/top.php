@@ -1,14 +1,17 @@
 <!DOCTYPE html>
+<?php
+    function get_file($file){
+        return url('auth/openFile',['file'=>$file]);
+    }
+?>
 
 <head>
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo isset($navTabs['title'])?$navTabs['title']:'后台操作系统'?></title>
-    <link   href="__PublicAdmin__/css/bootstrap.min.css" rel="stylesheet">
-    <link href="__PublicAdmin__/css/site.css" rel="stylesheet">
-    <script src="__PublicAdmin__/js/jquery.min.js"></script>
-    <script src="__PublicAdmin__/js/bootstrap.min.js"></script>
-
+    <title>后台操作系统</title>
+    <link href="<?php echo get_file('css_bootstrap.min.css')?>" rel="stylesheet">
+    <link href="<?php echo get_file('css_site.css')?>" rel="stylesheet">
+    <script src="<?php echo get_file('js_jquery.min.js')?>"></script>
+    <script src="<?php echo get_file('js_bootstrap.min.js')?>"></script>
 </head>
 
 

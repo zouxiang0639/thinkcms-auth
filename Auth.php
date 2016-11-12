@@ -74,6 +74,14 @@ class Auth
 
     }
 
+
+    /**
+     * 检查权限
+     * @param  string          $rule   路由
+     * @param  int             $uid
+     * @param  string          $relation
+     * @return mixed
+     */
     protected function authCheck($rule,$uid,$relation='or'){
 
 

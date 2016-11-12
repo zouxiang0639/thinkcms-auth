@@ -1,0 +1,15 @@
+html,
+.help-block-error{color: #a94442;}
+.nav{margin-bottom: 20px;margin-top: 20px;}
+.table td {font-size: 12px;}
+a{color: #1abc9c;}
+.form-required{float: left;padding-top: 6px;padding-left: 4px;font-size: 18px;color: #e74c3c;}
+.text{float: left;width: 300px;}
+.width1{width: 100px}
+.width2{width: 200px}
+.width3{width: 300px}
+.listOrder{height: 20px; border: 1px solid rgb(203, 208, 212); text-align: center; width: 40px; background-color: rgb(241, 241, 241);}
+.toggle {text-align: center;}
+.toggle img{cursor: pointer	}
+
+

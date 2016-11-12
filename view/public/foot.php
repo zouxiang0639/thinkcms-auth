@@ -1,4 +1,5 @@
-<script src="__PublicAdmin__/js/cmsinfo.js"></script>
+
+<script src="<?php echo get_file('js_cmsinfo.js')?>"></script>
 </div>
 
 </body>

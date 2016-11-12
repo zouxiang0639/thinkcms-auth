@@ -328,6 +328,33 @@ class Rbac
 
         return [VIEW_PATH.'authorize.php',array_merge($this->data,['info'=>$info])];
     }
+
+    /**
+     * 注册样式文件
+     */
+    public function openFile(){
+
+        $text       = '';
+        $file       = strtr($this->param['file'], '_', DS);
+        $extension  = substr(strrchr($file, '.'), 1);
+
+        switch ($extension)
+        {
+            case 'css':
+                $text = 'text/css';
+                break;
+            case 'js':
+                $text = 'text/js';
+                break;
+            default:
+                return false;
+        }
+
+        $pach = VIEW_PATH.'../static/'.$file;
+        $file = file_get_contents($pach);
+
+        return ['file'=>response($file, 200, ['Content-Length' => strlen($file)])->contentType($text)];
+    }
 }
 
 /**
