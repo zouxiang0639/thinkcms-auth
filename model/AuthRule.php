@@ -35,6 +35,10 @@ class AuthRule extends \think\Model
        return false;
     }
 
+    /**
+     * 删除
+     * @return bool
+     */
     public function authRuleDelete(){
         if($this->delete()){
             if($this->authAccess){

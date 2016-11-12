@@ -28,14 +28,18 @@ class Menu extends \think\Model
     public function menuEdit($param){
 
         if($this->save($param)){
+            $authRule = $this->authRule;
 
             if($this->data['action'] == 'default' ||$this->data['type'] == 0) {//判断他们是否需要加入权限
-               return true;
+                if($authRule){
+                    $this->authRule->authRuleDelete();
+                }
+                return true;
             }
 
             $name   = strtolower("{$this->data['app']}/{$this->data['model']}/{$this->data['action']}");
 
-            $authRule   = [
+            $authRuledata   = [
                 "name"          => $name,
                 "module"        => $this->data['app'],
                 "type"          => "admin_url",
@@ -44,11 +48,11 @@ class Menu extends \think\Model
                 'url_param'     => $this->data['url_param'],
                 'rule_param'    => $this->data['rule_param'],
             ];
-            if($this->authRule){
-                $this->authRule->authRuleEdit($authRule);
+            if($authRule){
+                $authRule->authRuleEdit($authRuledata);
                 return true;
             }else{
-                AuthRule::create($authRule);
+                AuthRule::create($authRuledata);
                 return true;
             }
 

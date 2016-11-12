@@ -15,6 +15,8 @@ defined('VIEW_PATH') or define('VIEW_PATH', __DIR__ . DS.'view'. DS);
 use think\Loader;
 use think\Request;
 use thinkcms\auth\controller\Rbac;
+use thinkcms\auth\model\AuthAccess;
+use thinkcms\auth\model\AuthRoleUser;
 
 class Auth
 {
@@ -24,6 +26,7 @@ class Auth
     public function __construct()
     {
         $this->request      = Request::instance();
+        $this->param        = $this->request->param();
         $this->module       = $this->request->module();
         $this->controller   = $this->request->controller();
         $this->action       = $this->request->action();
@@ -53,15 +56,17 @@ class Auth
     public function auth($uid){
 
         //如果用户角色是1，则无需判断
+        if(empty($uid)){
+            return false;
+        }
         if($uid == 1){
             return true;
         }
 
-        $controller = strtolower(Loader::parseName($this->controller,1)); //字符串命名风格转换
-        $rule       = "{$this->module}/{$controller}/{$this->action}";
+        $controller = Loader::parseName($this->controller,1); //字符串命名风格转换
+        $rule       = strtolower("{$this->module}/{$controller}/{$this->action}");
 
         if( !in_array($rule,$this->noNeedCheckRules) ){
-
             return self::authCheck($rule,$uid,'or');
         }else{
             return true;
@@ -69,81 +74,52 @@ class Auth
 
     }
 
-    protected function authCheck($name,$uid,$relation='or'){
-
-        dump($name);die;
-        if(empty($uid)){
-            return false;
-        }
-        if($uid==1){
-            return true;
-        }
-
-        if (is_string($name)) {
-            $name = strtolower($name);
-
-            if (strpos($name, ',') !== false) {
-                $name = explode(',', $name);
-            } else {
-                $name = array($name);
-
-            }
-        }
-        $list = array(); //保存验证通过的规则名)
+    protected function authCheck($rule,$uid,$relation='or'){
 
 
-
-        $group=DB("auth_role_user")->alias("a")->join(config('database.prefix').'auth_role b','a.role_id = b.id')->where(array("user_id"=>$uid,"status"=>1))->field("role_id")->select();
-
-        $groups = array();
-
+        $rule   = array($rule);
+        $roleId = [];
+        $list   = []; //保存验证通过的规则名)
+        $param  = $this->param;
+        $group  = AuthRoleUser::hasWhere('authRule')->field('a.*')->where(['a.user_id'=>$uid])->select()->toarray();
         foreach($group as $k=>$v){
-            $groups[$k] = $v['role_id'];
+            $roleId[$k] = $v['role_id'];
         }
 
-        if(in_array(1, $groups)){
+        if(in_array(1, $roleId)){
             return true;
         }
-
-        if(empty($groups)){
+        if(empty($roleId)){
             return false;
         }
 
-        $rules = DB("auth_access")->alias("a")->join(config('database.prefix').'auth_rule b','a.rule_name = b.name')->where(array("a.role_id"=>array("in",$groups),"b.name"=>array("in",$name)))->select();
-
+        $rules = AuthAccess::hasWhere('authRule')->field('a.*,b.*')->where(["a.role_id"=>["in",$roleId],"b.name"=>["in",$rule]])->select()->toarray();
 
         foreach ($rules as $rule){
-            if (!empty($rule['condition'])) { //根据condition进行验证
-
+            if (!empty($rule['rule_param'])) { //根据rule_param进行验证
+                $condition  = false;
                 // $user = $this->getUserInfo($uid);//获取用户信息,一维数组
 
-
-                $command = preg_replace('/\{(\w*?)\}/', '$param[\'\\1\']', $rule['condition']);
-
+                $command = preg_replace('/\{(\w*?)\}/', '$param[\'\\1\']', $rule['rule_param']);
 
                 @(eval('$condition=(' . $command . ');'));
-
-
                 if ($condition) {
-
                     $list[] = strtolower($rule['name']);
-
                 }
+
             }else{
                 $list[] = strtolower($rule['name']);
             }
         }
 
-
-
         if ($relation == 'or' and !empty($list)) {
-
             return true;
         }
 
-        $diff = array_diff($name, $list);
+        $diff = array_diff($rule, $list);
 
         if ($relation == 'and' and empty($diff)) {
+
             return true;
         }
 

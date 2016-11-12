@@ -12,11 +12,17 @@ class AuthRole extends \think\Model
     {
 
     }
+
+    //一对多 权限授权
     public function authAccess()
     {
         return $this->hasMany('AuthAccess','role_id','id');
     }
 
+    /**
+     * 关联删除 AuthAccess
+     * @return bool
+     */
     public function authRoleDelete(){
         if($this->delete()){
             if($this->authAccess){
@@ -25,7 +31,6 @@ class AuthRole extends \think\Model
             return true;
         }
         return false;
-
     }
 
 }

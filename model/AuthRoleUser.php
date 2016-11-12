@@ -13,16 +13,22 @@ class AuthRoleUser extends \think\Model
 
     }
 
+    //关联一对一 角色
+    public function authRule()
+    {
+        return $this->hasOne('authRole','id','role_id');
+    }
+
     /**
      * 加入角色权限
      * @param array     $role_id   角色ID
      * @param int     $user_id   用户ID
      * @return bool
      */
-    public static function authRoleUserAdd($role_id,$user_id){
+    public function authRoleUserAdd($role_id,$user_id){
 
         $data = [];
-        if(is_array($user_id)){
+        if(is_array($role_id)){
             self::where(['user_id'=>$user_id])->delete();
             foreach($role_id as $v){
                 $data[]  = [
@@ -31,6 +37,7 @@ class AuthRoleUser extends \think\Model
                 ];
             }
             self::saveAll($data);
+
             return true;
         }
         return false;
@@ -41,7 +48,7 @@ class AuthRoleUser extends \think\Model
      * @param int     $user_id   用户ID
      * @return bool
      */
-    public static function authRoleUserDelete($user_id){
+    public function authRoleUserDelete($user_id){
         self::where(['user_id'=>$user_id])->delete();
     }
 

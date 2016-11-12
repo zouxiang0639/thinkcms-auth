@@ -13,5 +13,10 @@ class AuthAccess extends \think\Model
 
     }
 
+    //关联一对一 角色
+    public function authRule()
+    {
+        return $this->hasOne('AuthRule','menu_id','menu_id');
+    }
 }
 ?>
