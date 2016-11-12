@@ -9,7 +9,7 @@ $type    = isset($info['type'])?$info['type']:'';
         <tr>
             <th class="col-sm-2">上级</th>
             <th>
-                <select class="form-control text" name="parentid">
+                <select class="form-control text" name="parent_id">
                     <option value="0">/</option>
                     <?php echo isset($info['selectCategorys'])?$info['selectCategorys']:'';?>
                 </select>

@@ -12,6 +12,8 @@
             <th width="50">ID</th>
             <th>菜单名称</th>
             <th>应用</th>
+            <th>控制器</th>
+            <th>方法</th>
             <th width="80">状态</th>
             <th width="180">操作</th>
         </tr>

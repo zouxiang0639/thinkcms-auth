@@ -62,7 +62,8 @@ class Menu extends \think\Model
      * @return bool
      */
     public function menuAdd($param){
-        if($auth = $this->create($param)){
+        $auth = $this->create($param);
+        if($auth){
 
             $name   = strtolower("{$auth->data['app']}/{$auth->data['model']}/{$auth->data['action']}");
             $authRule   = [

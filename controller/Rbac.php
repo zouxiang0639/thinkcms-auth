@@ -48,6 +48,8 @@ class Rbac
                     <td>\$id</td>
                     <td>\$spacer  \$name</td>
                     <td>\$app</td>
+                    <td>\$model</td>
+                    <td>\$action</td>
                     <td>\$status</td>
                     <td>\$str_manage</td>
                 </tr>";
@@ -245,10 +247,9 @@ class Rbac
                 return ['code'=>0,'msg'=>'需要授权的角色不存在'];
             }
 
+            AuthAccess::where(["role_id" => $roleid,'type'=>'admin_url'])->delete();
+
             if (is_array($menuid) && count($menuid)>0) {
-
-                AuthAccess::where(["role_id" => $roleid,'type'=>'admin_url'])->delete();
-
                 foreach ($menuid as $v) {
 
                     $menus   = isset($menu[$v])?$menu[$v]:'';
@@ -335,7 +336,7 @@ class Rbac
  * @return mixed
  */
 function menu($selected = 1){
-
+    $array = '';
     $result = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
 
     $tree = new Tree();
