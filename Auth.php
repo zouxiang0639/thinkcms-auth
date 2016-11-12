@@ -17,6 +17,7 @@ use think\Request;
 use thinkcms\auth\controller\Rbac;
 use thinkcms\auth\model\AuthAccess;
 use thinkcms\auth\model\AuthRoleUser;
+use thinkcms\auth\model\Menu;
 
 class Auth
 {
@@ -63,15 +64,42 @@ class Auth
             return true;
         }
 
-        $controller = Loader::parseName($this->controller,1); //字符串命名风格转换
-        $rule       = strtolower("{$this->module}/{$controller}/{$this->action}");
+        $controller         = Loader::parseName($this->controller,1); //字符串命名风格转换
+        $rule               = strtolower("{$this->module}/{$controller}/{$this->action}");
 
-        if( !in_array($rule,$this->noNeedCheckRules) ){
+        //无需认证
+        $noNeedCheckRules   = array_merge($this->noNeedCheckRules,[$this->module.'/auth/openfile']);
+
+        if( !in_array($rule,$noNeedCheckRules) ){
             return self::authCheck($rule,$uid,'or');
         }else{
             return true;
         }
 
+    }
+
+    /**
+     * 菜单权限检查
+     * @param  int             $uid
+     * @return array
+     */
+    public static function menuCheck($uid){
+
+        if(empty($uid)){
+            return false;
+        }
+
+        $authRoleUser = AuthRoleUser::where(['user_id'=>$uid,'role_id'=>1])->find();
+        $where['status'] = 1;
+
+        if($uid==1 || !empty($authRoleUser)){
+        }else{
+            $menu_id    = AuthRoleUser::hasWhere('authAccess')->field('b.*')->where(['a.user_id'=>$uid])->column('b.menu_id');
+            $where['id']=['in',$menu_id];
+        }
+
+        $menu       = Menu::where($where)->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
+        return $menu;
     }
 
 
@@ -133,6 +161,7 @@ class Auth
 
         return false;
     }
+
 
 
 }

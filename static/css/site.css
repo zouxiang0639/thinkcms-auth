@@ -3,6 +3,7 @@ html,
 .nav{margin-bottom: 20px;margin-top: 20px;}
 .table td {font-size: 12px;}
 a{color: #1abc9c;}
+.form-actions {padding: 19px 20px 20px;margin-top: 20px;margin-bottom: 20px;background-color: #f5f5f5;border-top: 1px solid #e5e5e5;}
 .form-required{float: left;padding-top: 6px;padding-left: 4px;font-size: 18px;color: #e74c3c;}
 .text{float: left;width: 300px;}
 .width1{width: 100px}
@@ -11,5 +12,5 @@ a{color: #1abc9c;}
 .listOrder{height: 20px; border: 1px solid rgb(203, 208, 212); text-align: center; width: 40px; background-color: rgb(241, 241, 241);}
 .toggle {text-align: center;}
 .toggle img{cursor: pointer	}
-
+.span-text{float: left;padding-top: 9px;padding-left: 10px;padding-right: 10px;}
 

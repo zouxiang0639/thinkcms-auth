@@ -13,6 +13,13 @@ class Menu extends \think\Model
 
     }
 
+    /**
+     * 缓存后台菜单数据
+     */
+    public static function initMenu() {
+        return Menu::where(['status'=>1])->order(["list_order" => "asc",'id'=>'asc'])->cache('initMenu',3600)->select()->toArray();
+    }
+
     //关联一对一 目录
     public function authRule()
     {

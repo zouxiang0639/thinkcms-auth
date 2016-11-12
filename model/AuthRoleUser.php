@@ -19,6 +19,12 @@ class AuthRoleUser extends \think\Model
         return $this->hasOne('authRole','id','role_id');
     }
 
+    //关联一对一 角色
+    public function authAccess()
+    {
+        return $this->hasOne('authAccess','role_id','role_id');
+    }
+
     /**
      * 加入角色权限
      * @param array     $role_id   角色ID
