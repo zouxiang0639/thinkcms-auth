@@ -1,4 +1,4 @@
-# thinkcms-auth
+# thinkphp5 权限认证 RBAC auth
 thinkphp5.0 auth
 ## 安装
 > composer require zouxiang0639/thinkcms-auth:dev-master
@@ -23,13 +23,13 @@ thinkphp5.0 auth
 ~~~
 在模块中创建一个Auth控制器，把_empty方法复制上去，这样就可以访问以下视图
 
-**/auth/default.html        角色列表
-**/auth/roleAdd.html        角色添加
-**/auth/roleEdit.html       角色修改
-**/auth/authorize/id/2.html 权限设置
-**/auth/menu.html           菜单列表
-**/auth/menuAdd.html        菜单增加
-**/auth/menuEdit.html       菜单修改
+* /auth/default.html        角色列表 
+* /auth/roleAdd.html        角色添加
+* /auth/roleEdit.html       角色修改
+* /auth/authorize/id/2.html 权限设置
+* /auth/menu.html           菜单列表
+* /auth/menuAdd.html        菜单增加
+* /auth/menuEdit.html       菜单修改
 
 ## 权限认证
 ~~~
