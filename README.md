@@ -19,6 +19,7 @@ thinkphp5.0 auth
                 $this->view->engine->layout(false);
                 return $this->fetch($auth[0],$auth[1]);
             }
+            return abort(404,'页面不存在');
         }
 ~~~
 在模块中创建一个Auth控制器，把_empty方法复制上去，这样就可以访问以下视图
