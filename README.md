@@ -1,7 +1,7 @@
 # thinkphp5 权限认证 RBAC auth
 thinkphp5.0 auth
 ## 安装
-> composer require zouxiang0639/thinkcms-auth:dev-master
+> composer require zouxiang0639/thinkcms-auth
 
 
 ## 视图调用
