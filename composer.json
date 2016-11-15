@@ -8,9 +8,6 @@
             "email": "542506511@qq.com"
         }
     ],
-    "require-dev": {
-        "zouxiang0639/thinkcms-auth": "dev-master"
-    },
     "require": {},
     "autoload": {
         "psr-4": {

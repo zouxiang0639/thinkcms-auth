@@ -15,12 +15,13 @@ class Rbac
 
     public $menuValidate    = ['name|名称'=>'require' , 'app|应用'=>'require' , 'model|控制器'=>'require' , 'action|方法'=>'require'];
     public $roleValidate    = ['name|角色名称'  => 'require'];
-
+    private $id;
     public function __construct($request)
     {
         $this->request  = $request;
         $this->param    = $this->request->param();
         $this->post     = $this->request->post();
+        $this->id       = isset($this->param['id'])?intval($this->param['id']):'';
         $this->data     = ['pach'=>VIEW_PATH];
     }
 
@@ -64,9 +65,12 @@ class Rbac
      */
     public function menuEdit(){
 
-        $param  = $this->param;
         $post   = $this->post;
-        $info   = Menu::get($param['id']);
+        $info   = Menu::get($this->id);
+
+        if(empty($info)){
+            return false;
+        }
 
         if($this->request->isPost()){
 
@@ -117,8 +121,7 @@ class Rbac
      */
     public function menuDelete(){
         if($this->request->isPost()){
-            $id       = intval($this->param['id']);
-            $result   = Menu::get($id);
+            $result   = Menu::get($this->id);
 
             if(empty($result)){
                 return ['code'=>0,'msg'=>'没有数据'];
@@ -126,7 +129,7 @@ class Rbac
                 return ['code'=>0,'msg'=>'有子目录不可删除'];
             };
 
-            if($result->menuDelete($id)){
+            if($result->menuDelete($this->id)){
                 return ['code'=>1,'msg'=>'删除成功','url'=>url('auth/menu')];
             }else{
                 return ['code'=>0,'msg'=>'删除失败'];
@@ -140,14 +143,17 @@ class Rbac
      */
     public function menuOrder(){
         if($this->request->isPost()) {
-            $id = intval($this->param['id']);
-            $order = intval($this->param['order']);
-            $result = Menu::get($id);
-            if ($result) {
+            $order  = isset($this->param['order'])?intval($this->param['order']):'';
+            $result = Menu::get($this->id);
+
+            if(empty($result)){
+                return ['code'=>0,'msg'=>'没有数据'];
+            }else if ($result) {
                 if ($result->save(['list_order' => $order])) {
                     return ['code' => 1, 'msg' => '数据已更新'];
                 }
             }
+
             return ['code'=>0,'msg'=>'数据无变化'];
         }
         return ['code'=>0,'msg'=>'请求方式错误'];
@@ -164,10 +170,12 @@ class Rbac
      * 角色修改
      */
     public function roleEdit(){
-        $param  = $this->param;
-        $post   = $this->post;
-        $info   = AuthRole::get($param['id']);
 
+        $post   = $this->post;
+        $info   = AuthRole::get($this->id);
+        if(empty($info)){
+            return false;
+        }
         //post 数据处理
         if($this->request->isPost()){
 
@@ -213,10 +221,9 @@ class Rbac
 
     public function roleDelete(){
         if($this->request->isPost()){
-            $id       = intval($this->param['id']);
-            $result   = AuthRole::get($id);
+            $result   = AuthRole::get($this->id);
 
-            if($id==1){
+            if($this->id==1){
                 return ['code'=>0,'msg'=>'超级管理员不可删除'];
             }else if(empty($result)){
                 return ['code'=>0,'msg'=>'没有数据'];
@@ -235,7 +242,7 @@ class Rbac
      */
     public function authorize(){
 
-        $roleid     = intval($this->param['id']);
+
         $menu       = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
 
         if($this->request->isPost()){//表单处理
@@ -243,11 +250,11 @@ class Rbac
             $post   = $this->post;
             $menuid = $post['menuid'];
 
-            if(empty($roleid)){
+            if(empty($this->id)){
                 return ['code'=>0,'msg'=>'需要授权的角色不存在'];
             }
 
-            AuthAccess::where(["role_id" => $roleid,'type'=>'admin_url'])->delete();
+            AuthAccess::where(["role_id" => $this->id,'type'=>'admin_url'])->delete();
 
             if (is_array($menuid) && count($menuid)>0) {
                 foreach ($menuid as $v) {
@@ -257,7 +264,7 @@ class Rbac
                     if($menus){
                         $name   = strtolower("{$menus['app']}/{$menus['model']}/{$menus['action']}");
                         $data[]   = [
-                            "role_id"   => $roleid,
+                            "role_id"   => $this->id,
                             "rule_name" => $name,
                             'type'      => 'admin_url',
                             'menu_id'   => $v
@@ -280,8 +287,11 @@ class Rbac
         }//表单处理结束
 
 
-        $priv_data  = AuthAccess::where(["role_id"=>$roleid])->field("rule_name")->column('menu_id');
+        $priv_data  = AuthAccess::where(["role_id"=>$this->id])->field("rule_name")->column('menu_id');
 
+        if(empty($priv_data)){
+            return false;
+        }
 
         $tree       = new Tree();
         foreach ($menu as $n => $t) {
@@ -297,7 +307,7 @@ class Rbac
                         \$name
                    </label>",
             '0' => [
-            '0' =>"<dl class='checkmod'>
+                '0' =>"<dl class='checkmod'>
                     <dt class='hd'>
                         <label class='checkbox' data-original-title='' data-toggle='tooltip'>
                             <input \$checked name='menuid[]' value='\$id' level='\$level' onclick='javascript:checknode(this);'
@@ -306,10 +316,10 @@ class Rbac
                         </label>
                     </dt>
                     <dd class='bd'>",
-            '1' => "</dd></dl>",
+                '1' => "</dd></dl>",
             ],
             '1' => [
-            '0' => "
+                '0' => "
                         <div class='menu_parent'>
                             <label class='checkbox' data-original-title='' data-toggle='tooltip'>
                                 <input \$checked name='menuid[]' value='\$id' level='\$level'
@@ -318,13 +328,13 @@ class Rbac
                         </div>
                         <div class='rule_check' style='width: \$width%;'>",
 
-            '1' => "</div><span class='child_row'></span>",
+                '1' => "</div><span class='child_row'></span>",
             ]
 
         ];
 
         $info['html']   = $tree->get_authTree(0);
-        $info['id']     = $roleid;
+        $info['id']     = $this->id;
 
         return [VIEW_PATH.'authorize.php',array_merge($this->data,['info'=>$info])];
     }
