@@ -6,6 +6,7 @@ namespace thinkcms\auth\controller;
 
 use think\Validate;
 use thinkcms\auth\library\Tree;
+use thinkcms\auth\model\ActionLog;
 use thinkcms\auth\model\AuthAccess;
 use thinkcms\auth\model\AuthRole;
 use thinkcms\auth\model\Menu;
@@ -51,6 +52,7 @@ class Rbac
                     <td>\$app</td>
                     <td>\$model</td>
                     <td>\$action</td>
+                    <td>\$request</td>
                     <td>\$status</td>
                     <td>\$str_manage</td>
                 </tr>";
@@ -365,6 +367,27 @@ class Rbac
 
         return ['file'=>response($file, 200, ['Content-Length' => strlen($file)])->contentType($text)];
     }
+
+    /**
+     * 日志列表
+     */
+    public function log(){
+        $list   = ActionLog::paginate(20);
+        $page   = $list->render();
+
+        return [VIEW_PATH.'log.php',array_merge($this->data,['list'=>$list,'page'=>$page])];
+    }
+
+    /**
+     * 日志详情
+     */
+    public function clear(){
+        if(ActionLog::where('1=1')->delete()){
+            return ['code'=>1,'msg'=>'数据已清空','url'=>url('auth/log')];
+        }
+        return ['code'=>0,'msg'=>'操作失败'];
+    }
+
 }
 
 /**

@@ -91,9 +91,9 @@ $type    = isset($info['type'])?$info['type']:'';
                     <option value="">关闭</option>
                     <?php
                         $type       = ['GET','POST','PUT','PUT','DELETE','Ajax'];
-                        $log_rule   = isset($info['log_rule'])?$info['log_rule']:'';
+                        $request   = isset($info['request'])?$info['request']:'';
                         foreach($type as $v){
-                            $selected = $log_rule == $v ?'selected':'';
+                            $selected = $request == $v ?'selected':'';
                             echo '<option '.$selected.' value="'.$v.'">'.$v.'</option>';
                         }
                     ?>

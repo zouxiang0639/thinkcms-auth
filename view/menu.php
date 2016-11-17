@@ -14,6 +14,7 @@
             <th>应用</th>
             <th>控制器</th>
             <th>方法</th>
+            <th>日志请求</th>
             <th width="80">状态</th>
             <th width="180">操作</th>
         </tr>

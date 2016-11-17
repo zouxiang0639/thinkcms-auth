@@ -16,8 +16,24 @@ class Menu extends \think\Model
     /**
      * 缓存后台菜单数据
      */
-    public static function initMenu() {
-        return Menu::where(['status'=>1])->order(["list_order" => "asc",'id'=>'asc'])->cache('initMenu',3600)->select()->toArray();
+    public static function actionLogMenu() {
+        $log = [];
+        $men = Menu::where('request <> "" ')->select()->toArray();
+        foreach($men as $v){
+            $url = strtolower($v['app'].'/'.$v['model'].'/'.$v['action']);
+            $arr = [
+                'log_rule'  => $v['log_rule'],
+                'request'   => $v['request'],
+                'rule_param'=> $v['rule_param'],
+                'name'      => $v['name'],
+            ];
+            if(!isset($log[$url])){
+                $log[$url]              = $arr;
+            }else{
+                $log[$url]['child'][]   = $arr;
+            }
+        }
+        return $log;
     }
 
     //关联一对一 目录
