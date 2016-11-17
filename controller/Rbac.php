@@ -4,6 +4,7 @@
 namespace thinkcms\auth\controller;
 
 
+use think\Cache;
 use think\Validate;
 use thinkcms\auth\library\Tree;
 use thinkcms\auth\model\ActionLog;
@@ -372,7 +373,7 @@ class Rbac
      * 日志列表
      */
     public function log(){
-        $list   = ActionLog::paginate(20);
+        $list   = ActionLog::where('')->order('id desc')->paginate(20);
         $page   = $list->render();
 
         return [VIEW_PATH.'log.php',array_merge($this->data,['list'=>$list,'page'=>$page])];
@@ -381,11 +382,27 @@ class Rbac
     /**
      * 日志详情
      */
+    public function viewLog(){
+        $info   = ActionLog::get($this->id);
+        return [VIEW_PATH.'viewLog.php',array_merge($this->data,['info'=>$info])];
+    }
+
+    /**
+     * 清空日志
+     */
     public function clear(){
         if(ActionLog::where('1=1')->delete()){
             return ['code'=>1,'msg'=>'数据已清空','url'=>url('auth/log')];
         }
         return ['code'=>0,'msg'=>'操作失败'];
+    }
+
+    /**
+     * 清除缓存
+     */
+    public function cache(){
+        Cache::rm('logMenu');
+        return ['code'=>1,'msg'=>'操作成功','url'=>url('auth/menu')];
     }
 
 }

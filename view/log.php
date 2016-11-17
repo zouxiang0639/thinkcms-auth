@@ -8,6 +8,7 @@
                 <div class="btn-group">
                     <button type="button"  post-url="{:Url('auth/clear')}" class="btn ajax-post btn-success">清空</button>
                 </div>
+
             </div>
         </div>
         <table class="table table-hover table-bordered table-list" id="menus-table">

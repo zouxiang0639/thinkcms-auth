@@ -1,7 +1,15 @@
 <!DOCTYPE html>
 <?php
+
     function get_file($file){
-        return url('auth/openFile',['file'=>$file]);
+        $directory =  \think\Config::get('thinkcms.style_directory');
+        if(empty($directory)){
+            return url('auth/openFile',['file'=>$file]);
+        }else{
+            $file       = strtr($file, '_', DS);
+            return $directory.$file;
+        }
+
     }
 ?>
 

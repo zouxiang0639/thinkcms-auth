@@ -23,10 +23,11 @@ use thinkcms\auth\model\Menu;
 
 class Auth
 {
-
     const  PATH                 = __DIR__;
+    public $log                 = true;
     public $noNeedCheckRules    = [];           //不需要检查的路由规则
     public $admin               = '';           //管理员
+
     public function __construct()
     {
         $this->request      = Request::instance();
@@ -34,7 +35,6 @@ class Auth
         $this->module       = $this->request->module();
         $this->controller   = $this->request->controller();
         $this->action       = $this->request->action();
-
     }
 
     /**
@@ -60,8 +60,6 @@ class Auth
      */
     public function auth($uid){
 
-
-
         $controller         = Loader::parseName($this->controller,1); //字符串命名风格转换
         $rule               = strtolower("{$this->module}/{$controller}/{$this->action}");
         //如果用户角色是1，则无需判断
@@ -73,7 +71,7 @@ class Auth
             return true;
         }
         //无需认证
-        $noNeedCheckRules   = array_merge($this->noNeedCheckRules,[$this->module.'/auth/openfile']);
+        $noNeedCheckRules   = array_merge($this->noNeedCheckRules,[$this->module.'/auth/openfile',$this->module.'/auth/cache']);
 
         if( !in_array($rule,$noNeedCheckRules) ){
             return self::authCheck($rule,$uid,'or');
@@ -115,6 +113,11 @@ class Auth
      * @return array
      */
     private function actionLog($rule,$uid){
+
+        //是否需要打开 行为日志检查
+        if($this->log === false){
+            return true;
+        }
 
         $logMenu    = Cache::get('logMenu');
         if(empty($logMenu)){    //缓存日志24小时
@@ -167,6 +170,7 @@ class Auth
      */
     public function  createLog($logrule,$title,$uid){
         $param = $this->param;
+
         $condition = '';
         $command   = preg_replace('/\{(\w*?)\}/', '{$param[\'\\1\']}', $logrule);
         @(eval('$condition=("' . $command . '");'));
@@ -203,6 +207,9 @@ class Auth
         }
 
         if(in_array(1, $roleId)){
+
+            //行为日志
+            self::actionLog($rule,$uid);
             return true;
         }
         if(empty($roleId)){
@@ -229,6 +236,10 @@ class Auth
         }
 
         if ($relation == 'or' and !empty($list)) {
+
+            //行为日志
+            self::actionLog($rule,$uid);
+
             return true;
         }
 
