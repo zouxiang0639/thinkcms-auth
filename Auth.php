@@ -124,8 +124,8 @@ class Auth
             $logMenu    = Menu::actionLogMenu();
             Cache::set('logMenu',$logMenu,86400);
         }
-
         $menu       =   isset($logMenu[$rule])?$logMenu[$rule]:'';
+
         $log        = [];
         if(empty($menu)){
             return true;
@@ -189,19 +189,19 @@ class Auth
 
     /**
      * 检查权限
-     * @param  string          $rule   路由
+     * @param  string          $url   路由
      * @param  int             $uid
      * @param  string          $relation
      * @return mixed
      */
-    protected function authCheck($rule,$uid,$relation='or'){
+    protected function authCheck($url,$uid,$relation='or'){
 
 
-        $rule   = array($rule);
+        $rule   = array($url);
         $roleId = [];
         $list   = []; //保存验证通过的规则名)
         $param  = $this->param;
-        $group  = AuthRoleUser::hasWhere('authRule')->field('a.*')->where(['a.user_id'=>$uid])->select()->toarray();
+        $group  = AuthRoleUser::hasWhere('authRule')->field('a.*')->where(['a.user_id'=>$uid])->select();
         foreach($group as $k=>$v){
             $roleId[$k] = $v['role_id'];
         }
@@ -216,7 +216,7 @@ class Auth
             return false;
         }
 
-        $rules = AuthAccess::hasWhere('authRule')->field('a.*,b.*')->where(["a.role_id"=>["in",$roleId],"b.name"=>["in",$rule]])->select()->toarray();
+        $rules = AuthAccess::hasWhere('authRule')->field('a.*,b.*')->where(["a.role_id"=>["in",$roleId],"b.name"=>["in",$rule]])->select();
 
         foreach ($rules as $rule){
             if (!empty($rule['rule_param'])) { //根据rule_param进行验证
@@ -238,8 +238,7 @@ class Auth
         if ($relation == 'or' and !empty($list)) {
 
             //行为日志
-            self::actionLog($rule,$uid);
-
+            self::actionLog($url,$uid);
             return true;
         }
 

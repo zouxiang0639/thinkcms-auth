@@ -18,7 +18,8 @@ class Menu extends \think\Model
      */
     public static function actionLogMenu() {
         $log = [];
-        $men = Menu::where('request <> "" ')->select()->toArray();
+        $men = Menu::where('request <> "" ')->column('*');
+
         foreach($men as $v){
             $url = strtolower($v['app'].'/'.$v['model'].'/'.$v['action']);
             $arr = [
