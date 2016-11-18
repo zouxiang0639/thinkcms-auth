@@ -46,7 +46,7 @@
 ~~~
 在模块中创建一个Auth控制器，把_empty方法复制上去，这样就可以访问以下视图
 
-* /auth/default.html        角色列表 
+* /auth/role.html        角色列表 
 * /auth/roleAdd.html        角色添加
 * /auth/roleEdit.html       角色修改
 * /auth/authorize/id/2.html 权限设置
