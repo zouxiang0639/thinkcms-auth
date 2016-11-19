@@ -289,12 +289,13 @@ class Rbac
             }
         }//表单处理结束
 
+        if(empty($this->id)){
+            return false;
+        }
 
         $priv_data  = AuthAccess::where(["role_id"=>$this->id])->field("rule_name")->column('menu_id');
 
-        if(empty($priv_data)){
-            return false;
-        }
+
 
         $tree       = new Tree();
         foreach ($menu as $n => $t) {
