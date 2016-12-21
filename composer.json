@@ -12,6 +12,9 @@
     "autoload": {
         "psr-4": {
             "thinkcms\\auth\\": ""
-        }
+        },
+        "files": [
+            "helper.php"
+        ]
     }
 }

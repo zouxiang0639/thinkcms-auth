@@ -1,13 +1,17 @@
 <?php require $pach . 'public/top.php';?>
 <ul class="nav nav-tabs">
+
+    {if condition="checkPath('auth/menu')"}
     <li class="active"><a href="{:Url('auth/menu')}">后台菜单</a></li>
+    {/if}
+
     <li><a href="{:Url('auth/menuAdd')}">增加菜单</a></li>
 </ul>
 
 <div class="cf well form-search" style="height: 68px;">
     <div class="fl ">
         <div class="btn-group">
-            <button type="button"  post-url="{:Url('auth/cache')}" class="btn ajax-post btn-success">清除日志缓存</button>
+            <button type="button"  post-url="{:url('auth/cache')}" class="btn ajax-post btn-success">清除日志缓存</button>
         </div>
     </div>
 </div>
@@ -31,5 +35,5 @@
 </table>
 
 
-<input type="hidden" value="{:Url('auth/menuOrder')}" class="listOrderUrl">
+<input type="hidden" value="{:url('auth/menuOrder')}" class="listOrderUrl">
 <?php require $pach . 'public/foot.php';?>
