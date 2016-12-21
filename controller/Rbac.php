@@ -38,10 +38,10 @@ class Rbac
         foreach ($result as $n=> $r) {
             $result[$n]['level'] = $tree->get_level($r['id'], $result);
             $result[$n]['parent_id_node'] = ($r['parent_id']) ? ' class="child-of-node-' . $r['parent_id'] . '"' : '';
-            $result[$n]['str_manage'] = '
-                <a href="'.url("auth/menuAdd",["parent_id" => $r['id']]).'">添加子菜单</a> |
-                <a href="'.url("auth/menuEdit",["id" => $r['id']]).'">编辑</a> |
-                <a class="a-post" post-msg="你确定要删除吗" post-url="'.url("auth/menuDelete",["id" => $r['id']]).'">删除</a>';
+
+            $result[$n]['str_manage'] = checkPath('auth/menuAdd',["parent_id" => $r['id']]) ? '<a href="'.url("auth/menuAdd",["parent_id" => $r['id']]).'">添加子菜单</a> |':'';
+            $result[$n]['str_manage'] .= checkPath('auth/menuEdit',["id" => $r['id']]) ?'<a href="'.url("auth/menuEdit",["id" => $r['id']]).'">编辑</a> |':'';
+            $result[$n]['str_manage'] .= checkPath('auth/menuDelete',["id" => $r['id']]) ?'<a class="a-post" post-msg="你确定要删除吗" post-url="'.url("auth/menuDelete",["id" => $r['id']]).'">删除</a>|':'';
             $result[$n]['status'] = $r['status'] ? '开启' : '隐藏';
         }
         $str = "<tr id='node-\$id' \$parent_id_node>

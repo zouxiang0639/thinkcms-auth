@@ -1,11 +1,10 @@
 <?php require $pach . 'public/top.php';?>
 <ul class="nav nav-tabs">
 
-    {if condition="checkPath('auth/menu')"}
-    <li class="active"><a href="{:Url('auth/menu')}">后台菜单</a></li>
+    <li class="active"><a href="{:url('auth/menu')}">后台菜单</a></li>
+    {if condition="checkPath('auth/menuAdd')"}
+    <li><a href="{:url('auth/menuAdd')}">增加菜单</a></li>
     {/if}
-
-    <li><a href="{:Url('auth/menuAdd')}">增加菜单</a></li>
 </ul>
 
 <div class="cf well form-search" style="height: 68px;">

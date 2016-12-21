@@ -1,7 +1,9 @@
 
 <?php require $pach . 'public/top.php';?>
 <ul class="nav nav-tabs">
-    <li><a href="{:url('auth/menu')}">后台菜单</a></li>
+    {if condition="checkPath('auth/menu')"}
+        <li><a href="{:url('auth/menu')}">后台菜单</a></li>
+    {/if}
     <li class="active"><a href="{:url('auth/menuAdd')}">增加菜单</a></li>
 </ul>
 

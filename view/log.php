@@ -6,15 +6,16 @@
         <div class="cf well form-search" style="height: 68px;">
             <div class="fl ">
                 <div class="btn-group">
-                    <button type="button"  post-url="{:Url('auth/clear')}" class="btn ajax-post btn-success">清空</button>
+                    {if condition="checkPath('auth/clear')"}
+                     <button type="button"  post-url="{:Url('auth/clear')}" class="btn ajax-post btn-success">清空</button>
+                    {/if}
                 </div>
-
             </div>
         </div>
         <table class="table table-hover table-bordered table-list" id="menus-table">
             <thead>
             <tr>
-                <th width="100">id</th>
+                <th width="100">ID</th>
                 <th>标题</th>
                 <th width="">用户</th>
                 <th width="">执行地址</th>
@@ -33,14 +34,15 @@
                     <td>{$v.action_ip}</td>
                     <th>{:date('Y-m-d H:i:s',$v['create_time'])}</th>
                     <td>
-                        <a href="{:url('auth/viewlog',['id'=>$v['id']])}">详细</a>
+                        {if condition="checkPath('auth/viewlog',['id'=>$v['id']])"}
+                            <a href="{:url('auth/viewlog',['id'=>$v['id']])}">详细</a>
+                        {/if}
                     </td>
                 </tr>
             <?php } ?>
             </tbody>
         </table>
     </div>
-
     <div class="text-center">
         {$page}
     </div>

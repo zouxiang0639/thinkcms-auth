@@ -1,10 +1,11 @@
 <?php
 /**
- * @param array  $path
+ * @param string    $path
+ * @param array     $param
  * @return bool
  */
-function checkPath($path){
-    $a =  \thinkcms\auth\Auth::checkPath($path);
-    return $a;
+function checkPath($path,$param=[]){
+    $result =  \thinkcms\auth\Auth::checkPath($path,$param);
+    return $result;
 }
 ?>

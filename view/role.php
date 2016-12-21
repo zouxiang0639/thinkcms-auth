@@ -2,8 +2,12 @@
 <?php require $pach . 'public/top.php';?>
 
     <ul class="nav nav-tabs">
+
         <li class="active"><a href="<?php echo Url('auth/role')?>">角色管理</a></li>
-        <li><a href="<?php echo Url('auth/roleAdd')?>">增加角色</a></li>
+        {if condition="checkPath('auth/roleAdd')"}
+            <li><a href="<?php echo Url('auth/roleAdd')?>">增加角色</a></li>
+        {/if}
+
     </ul>
     <table class="table table-hover table-bordered">
         <thead>
@@ -34,9 +38,15 @@
                         <font color="#cccccc">编辑</font> |
                         <font color="#cccccc">删除</font>
                     <?php }else{ ?>
-                        <a href="<?php echo Url('auth/authorize',['id'=>$v['id']])?>">权限设置</a> |
-                        <a href="<?php echo Url('auth/roleEdit',['id'=>$v['id']])?>">编辑</a> |
-                        <a  class="a-post" post-msg="你确定要删除吗" post-url="<?php echo Url('auth/roleDelete',['id'=>$v['id']])?>">删除</a>
+                        {if condition="checkPath('auth/authorize',['id'=>$v['id']])"}
+                            <a href="<?php echo Url('auth/authorize',['id'=>$v['id']])?>">权限设置</a> |
+                        {/if}
+                        {if condition="checkPath('auth/roleEdit',['id'=>$v['id']])"}
+                            <a href="<?php echo Url('auth/roleEdit',['id'=>$v['id']])?>">编辑</a> |
+                        {/if}
+                        {if condition="checkPath('auth/roleDelete',['id'=>$v['id']])"}
+                            <a  class="a-post" post-msg="你确定要删除吗" post-url="<?php echo Url('auth/roleDelete',['id'=>$v['id']])?>">删除</a>
+                        {/if}
                     <?php } ?>
 
                 </td>

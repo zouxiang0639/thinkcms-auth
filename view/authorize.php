@@ -45,8 +45,12 @@
 
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
-        <li><a href="<?php echo url('auth/role')?>">角色管理</a></li>
-        <li><a href="<?php echo url('auth/roleAdd')?>">增加角色</a></li>
+        {if condition="checkPath('auth/role')"}
+            <li><a href="<?php echo url('auth/role')?>">角色管理</a></li>
+        {/if}
+        {if condition="checkPath('auth/roleAdd')"}
+            <li><a href="<?php echo url('auth/roleAdd')?>">增加角色</a></li>
+        {/if}
         <li class="active"><a href="">权限设置</a></li>
     </ul>
 

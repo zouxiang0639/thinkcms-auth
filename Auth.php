@@ -201,15 +201,28 @@ class Auth
      * @return bool
      */
     public static function checkPath($path,$param=[]){
-        $authMenu   = self::authMenu();
+        $uid        = self::sessionGet('user.uid');
+        if($uid == 1){
+            return true;
+        }
+
+        $authMenu   = Cache::get('authMenu_'.$uid);
+
+        if(!$authMenu){ //存入缓存
+            $authMenu   = self::authMenu();
+            Cache::set('authMenu_'.$uid,$authMenu,600);
+        }
+
         $count      = count(explode('/',$path));
         if($count == 2){
             $module = Request::instance()->module();
             $path   = "$module/$path";
         }
 
+        $path = strtolower($path);
+
         //是否为超级管理员角色
-        if(self::$superAuth === true){
+        if(self::$superAuth === true ){
             return true;
         }else if(self::$superAuth === false){
             return false;
@@ -230,11 +243,6 @@ class Auth
                 }
             }
         }
-
-        if (!empty($list)) {
-            return true;
-        }
-
         return false;
     }
 
@@ -315,9 +323,6 @@ class Auth
         }
         return $rule;
     }
-
-
-
 
     /**
      * 检测用户是否登录
