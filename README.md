@@ -23,7 +23,7 @@
 ~~~
     $auth = new Auth();
     $auth->admin = $list['user_name'];
-    $auth->createLog('管理员<spen style=\'color: #1dd2af;\'> {name}</spen>偷偷的进入后台了,','后台登录',$list['id']);
+    $auth->createLog('管理员<spen style=\'color: #1dd2af;\'>[ {name} ]</spen>偷偷的进入后台了,','后台登录',$list['id']);
 ~~~
 
 ## 视图调用
@@ -63,13 +63,12 @@
     {
         parent::__construct($request);
         $this->request  = $request;
-         $auth                   = new Auth();
-        $auth->noNeedCheckRules = ['index/index/index','index/index/home'];
-        $auth->log              = true;                 // v1.1版本  日志开关默认true
-        $auth->admin            = $session['name'];     // v1.1版本  管理员名称
-        $this->uid              = $session['id'];
-
-        if($this->uid){//用户登录状态
+        $auth     = new Auth();
+        $auth->noNeedCheckRules = ['index/index/index','index/index/home'];     //无需权限认证路由
+        $auth->log              = true;                                         // v1.1版本  日志开关默认true
+        $auth->admin            = $session['name'];                             // v1.1版本  管理员名称
+        $this->uid      = Session::get('admin.id');
+        if(!empty(Session::get('admin.name'))){//用户登录状态
             if(!$auth->auth($this->uid)){ // 权限认证
                 return $this->error("你没有权限访问！");
             }

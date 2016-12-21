@@ -374,6 +374,7 @@ class Rbac
      * 日志列表
      */
     public function log(){
+
         $list   = ActionLog::where('')->order('id desc')->paginate(20);
         $page   = $list->render();
 

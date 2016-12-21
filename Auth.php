@@ -53,10 +53,10 @@ class Auth
         $controller = new Rbac($this->request);
 
         if(strtolower($this->controller) == 'auth' && method_exists($controller,$name)){
-          return  call_user_func([$controller, $name]);
+            return  call_user_func([$controller, $name]);
         }
 
-       return false;
+        return false;
     }
 
     /**
@@ -142,6 +142,7 @@ class Auth
 
         //子集行为日志菜单匹配
         if(isset($menu['child'])){
+<<<<<<< HEAD
            foreach($menu['child'] as $v){
              if(!empty($v['rule_param'])){
                  $condition = '';
@@ -152,6 +153,18 @@ class Auth
                  }
              }
            }
+=======
+            foreach($menu['child'] as $v){
+                if(!empty($v['rule_param'])){
+                    $condition = '';
+                    $command   = preg_replace('/\{(\w*?)\}/', '$this->param[\'\\1\']', $v['rule_param']);
+                    @(eval('$condition=(' . $command . ');'));
+                    if ($condition and $v['request'] == $this->request->method()) {
+                        $log = $v;
+                    }
+                }
+            }
+>>>>>>> 094af0e8d3cb5f8d19454f1b2269a94afd3f160e
         }
 
         //父集行为日志菜单匹配
@@ -203,7 +216,12 @@ class Auth
      * @return bool
      */
     public static function checkPath($path,$param=[]){
+<<<<<<< HEAD
         $authMenu   = self::authMenu(self::sessionGet('user.uid'));
+=======
+
+        $authMenu   = self::authMenu(16);
+>>>>>>> 094af0e8d3cb5f8d19454f1b2269a94afd3f160e
         $count      = count(explode('/',$path));
         if($count == 2){
             $module = Request::instance()->module();
@@ -302,7 +320,11 @@ class Auth
     /**
      * 权限访问清单
      * @access private
+<<<<<<< HEAD
      * @param int       $uid 关联方法名
+=======
+     * @param int    $uid 关联方法名
+>>>>>>> 094af0e8d3cb5f8d19454f1b2269a94afd3f160e
      * @param array     $where 查询附加条件
      * @return array
      */
@@ -322,6 +344,7 @@ class Auth
     }
 
 
+<<<<<<< HEAD
 
 
     /**
@@ -397,5 +420,7 @@ class Auth
         return $user;
     }
 
+=======
+>>>>>>> 094af0e8d3cb5f8d19454f1b2269a94afd3f160e
 
 }
