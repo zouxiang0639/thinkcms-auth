@@ -13,8 +13,11 @@ namespace thinkcms\auth;
 defined('VIEW_PATH') or define('VIEW_PATH', __DIR__ . DS.'view'. DS);
 
 use think\Cache;
+
+use think\Config;
 use think\Loader;
 use think\Request;
+use think\Session;
 use thinkcms\auth\controller\Rbac;
 use thinkcms\auth\model\ActionLog;
 use thinkcms\auth\model\AuthAccess;
@@ -27,6 +30,7 @@ class Auth
     public $log                 = true;
     public $noNeedCheckRules    = [];           //不需要检查的路由规则
     public $admin               = '';           //管理员
+    protected static $superAuth;        //是否超级权限
 
     public function __construct()
     {
@@ -35,10 +39,12 @@ class Auth
         $this->module       = $this->request->module();
         $this->controller   = $this->request->controller();
         $this->action       = $this->request->action();
+
     }
 
     /**
      * 加载控制器方法
+     * @access public
      * @param  string  $name 方法名
      * @return mixed
      */
@@ -55,6 +61,7 @@ class Auth
 
     /**
      * 权限认证
+     * @access public
      * @param  int          $uid
      * @return mixed
      */
@@ -72,7 +79,6 @@ class Auth
         }
         //无需认证
         $noNeedCheckRules   = array_merge($this->noNeedCheckRules,[$this->module.'/auth/openfile',$this->module.'/auth/cache']);
-
         if( !in_array($rule,$noNeedCheckRules) ){
             return self::authCheck($rule,$uid,'or');
         }else{
@@ -83,6 +89,7 @@ class Auth
 
     /**
      * 菜单权限检查
+     * @access public
      * @param  int             $uid
      * @return array
      */
@@ -108,6 +115,7 @@ class Auth
 
     /**
      * 行为日志检查
+     * @access public
      * @param  string          $rule        日志规则
      * @param  int             $uid         执行者ID
      * @return array
@@ -124,6 +132,7 @@ class Auth
             $logMenu    = Menu::actionLogMenu();
             Cache::set('logMenu',$logMenu,86400);
         }
+
         $menu       =   isset($logMenu[$rule])?$logMenu[$rule]:'';
 
         $log        = [];
@@ -133,7 +142,6 @@ class Auth
 
         //子集行为日志菜单匹配
         if(isset($menu['child'])){
-
            foreach($menu['child'] as $v){
              if(!empty($v['rule_param'])){
                  $condition = '';
@@ -188,7 +196,53 @@ class Auth
     }
 
     /**
+     * 检查路由权限
+     * @access public static
+     * @param  string       $path       路由
+     * @param  array       $param      参数
+     * @return bool
+     */
+    public static function checkPath($path,$param=[]){
+        $authMenu   = self::authMenu(self::sessionGet('user.uid'));
+        $count      = count(explode('/',$path));
+        if($count == 2){
+            $module = Request::instance()->module();
+            $path   = "$module/$path";
+        }
+
+        //是否为超级管理员角色
+        if(self::$superAuth === true){
+            return true;
+        }else if(self::$superAuth === false){
+            return false;
+        }
+
+        //验证路由
+        foreach ($authMenu as $v){
+            if($v['name'] == $path){
+                if(empty($v['rule_param'])){  //验证规则为空,表示所有通过
+                    return true;
+                }else{                       //如有验证规则,根据规则验证
+                    $condition = false;
+                    $command = preg_replace('/\{(\w*?)\}/', '$param[\'\\1\']', $v['rule_param']);
+                    @(eval('$condition=(' . $command . ');'));
+                    if($condition){
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (!empty($list)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * 检查权限
+     * @access protected
      * @param  string          $url   路由
      * @param  int             $uid
      * @param  string          $relation
@@ -196,27 +250,20 @@ class Auth
      */
     protected function authCheck($url,$uid,$relation='or'){
 
-
         $rule   = array($url);
-        $roleId = [];
         $list   = []; //保存验证通过的规则名)
         $param  = $this->param;
-        $group  = AuthRoleUser::hasWhere('authRule')->field('a.*')->where(['a.user_id'=>$uid])->select();
-        foreach($group as $k=>$v){
-            $roleId[$k] = $v['role_id'];
-        }
 
-        if(in_array(1, $roleId)){
+        $rules = self::authMenu($uid,["b.name"=>["in",$rule]]);
 
+        //是否为超级管理员角色
+        if(self::$superAuth === true){
             //行为日志
-            self::actionLog($rule,$uid);
+            self::actionLog($url,$uid);
             return true;
-        }
-        if(empty($roleId)){
+        }else if(self::$superAuth === false){
             return false;
         }
-
-        $rules = AuthAccess::hasWhere('authRule')->field('a.*,b.*')->where(["a.role_id"=>["in",$roleId],"b.name"=>["in",$rule]])->select();
 
         foreach ($rules as $rule){
             if (!empty($rule['rule_param'])) { //根据rule_param进行验证
@@ -250,6 +297,104 @@ class Auth
         }
 
         return false;
+    }
+
+    /**
+     * 权限访问清单
+     * @access private
+     * @param int       $uid 关联方法名
+     * @param array     $where 查询附加条件
+     * @return array
+     */
+    private static function authMenu($uid,$where=[]){
+
+        $rule       = [];
+        $roleId     = AuthRoleUser::hasWhere('authRule')->where(['a.user_id'=>$uid])->column('role_id');
+        if(in_array(1,$roleId)){
+            self::$superAuth    = true;
+        }else if(empty($roleId)){
+            self::$superAuth    = false;
+        }else{
+            $where  = array_merge(["a.role_id"=>["in",$roleId]],$where);
+            $rule   = AuthAccess::hasWhere('authRule')->where($where)->column('*','menu_id');
+        }
+        return $rule;
+    }
+
+
+
+
+    /**
+     * 检测用户是否登录
+     * @return integer 0-未登录，大于0-当前登录用户ID
+     */
+    public static function is_login(){
+        $user = self::sessionGet('user');
+        if (empty($user)) {
+            return false;
+        } else {
+            return  self::sessionGet('user_sign') == self::data_auth_sign($user) ? $user : false;
+        }
+    }
+
+    /**
+     * 用户登入
+     * @access private static
+     * @param  int      $uid 用户ID
+     * @param  string   $nickname 用户昵称
+     * @return array
+     */
+    public static function login($uid,$nickname){
+        if(empty($uid) && empty($nickname)){
+            return false;
+        }
+        $session_prefix = Config::get('thinkcms.session_prefix');
+        $user           = [
+                            'uid'       => $uid,
+                            'nickname'  => $nickname,
+                            'time'      => time()
+                        ];
+
+        Session::set($session_prefix.'user',$user);
+        Session::set($session_prefix.'user_sign',self::data_auth_sign($user));
+        return true;
+    }
+
+    /**
+     * 注销
+     * @access private static
+     * @return bool
+     */
+    public static function logout(){
+        $session_prefix = Config::get('thinkcms.session_prefix');
+        Session::delete($session_prefix.'user');
+        Session::delete($session_prefix.'user_sign');
+        return true;
+    }
+
+    /**
+     * 数据签名认证
+     * @access private static
+     * @param  array  $data 被认证的数据
+     * @return string       签名
+     */
+    private static  function data_auth_sign($data) {
+        $code = http_build_query($data); //url编码并生成query字符串
+        $sign = sha1($code); //生成签名
+        return $sign;
+    }
+
+
+    /**
+     * 读取session
+     * @access private static
+     * @param  string  $path 被认证的数据
+     * @return mixed
+     */
+    private static function sessionGet($path =''){
+        $session_prefix = Config::get('thinkcms.session_prefix');
+        $user           = Session::get($session_prefix.$path);
+        return $user;
     }
 
 
