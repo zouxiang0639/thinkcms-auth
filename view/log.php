@@ -4,10 +4,28 @@
 </ul>
     <div>
         <div class="cf well form-search" style="height: 68px;">
-            <div class="fl ">
+            <form  method="get">
+                <div class="fl">
+
+                    <div class="btn-group">
+                        <input name="username" class="form-control" value="{:input('username')}"  placeholder="用户昵称" type="text">
+                    </div>
+                    <div class="btn-group">
+                        <input name="userId" class="form-control" value="{:input('userId')}" placeholder="用户ID" type="text">
+                    </div>
+                    <div class="btn-group">
+                        <input name="title" class="form-control" value="{:input('title')}" placeholder="标题" type="text">
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-success">查询</button>
+                    </div>
+                </div>
+            </form>
+            <div class="fr">
                 <div class="btn-group">
                     {if condition="checkPath('auth/clear')"}
-                     <button type="button"  post-url="{:Url('auth/clear')}" class="btn ajax-post btn-success">清空</button>
+                    <button type="button"  post-url="{:Url('auth/clear')}" class="btn ajax-post
+                         btn-success">清空</button>
                     {/if}
                 </div>
             </div>

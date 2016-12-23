@@ -374,8 +374,21 @@ class Rbac
      * 日志列表
      */
     public function log(){
+        $where  = [];
+        $param  = $this->param;
+        if(!empty($param['username'])){
+            $where['username']  = $param['username'];
+        }
+        if(!empty($param['userId'])){
+            $where['user_id']  = $param['userId'];
+        }
+        if(!empty($param['title'])){
+            $where['title']  = ['like','%'.$param['title'].'%'];
+        }
 
-        $list   = ActionLog::where('')->order('id desc')->paginate(20);
+        $list   = ActionLog::where($where)->order('id desc')->paginate(20,'',[
+            'query'=>$param
+        ]);
         $page   = $list->render();
 
         return [VIEW_PATH.'log.php',array_merge($this->data,['list'=>$list,'page'=>$page])];
