@@ -32,7 +32,7 @@ checkPath($path 路由,$param 参数)       检查路由是否有权限
 ~~~
     $auth = new Auth();
     $auth->admin = $list['user_name'];
-    $auth->createLog('管理员<spen style=\'color: #1dd2af;\'>[ {name} ]</spen>偷偷的进入后台了,','后台登录',$list['id']);
+    $auth->createLog('管理员<spen style=\'color: #1dd2af;\'>[ {name} ]</spen>偷偷的进入后台了,','后台登录');
 ~~~
 
 ## 视图调用
@@ -90,7 +90,7 @@ checkPath($path 路由,$param 参数)       检查路由是否有权限
 
 ## 授权菜单
 ~~~
- Auth::menuCheck($this->uid);
+ Auth::menuCheck();
 ~~~
 这个方法返回授权及非隐藏的所有菜单，这样我们后台的菜单就可以根据管理员的权限来来展示授权的目录 
 
