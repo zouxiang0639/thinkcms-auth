@@ -8,6 +8,7 @@
 ## v1.1更新
 * 1.加入了行为日志
 * 2.加入样式文件路由定义,
+
 ## v1.1.1新加入方法
 ~~~
 is_login()                              判断是否登录
@@ -20,7 +21,7 @@ checkPath($path 路由,$param 参数)       检查路由是否有权限
 ~~~
 'thinkcms' =>[
         'style_directory' => '/static/admin/',
-        'session_prefix'  => 'abc_',  
+        'session_prefix'  => 'abc_',
   ]
 ~~~
 
