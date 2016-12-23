@@ -6,16 +6,24 @@
 > composer require zouxiang0639/thinkcms-auth
 ~~~
 ## v1.1更新
-
 * 1.加入了行为日志
 * 2.加入样式文件路由定义,
+## v1.1.1新加入方法
+~~~
+is_login()                              判断是否登录
+login($uid 用户ID,$nickname 用户昵称)    用户登录
+logout()                               用户退出
+checkPath($path 路由,$param 参数)       检查路由是否有权限
+~~~
 
 ## 配置 v1.1
 ~~~
 'thinkcms' =>[
-        'style_directory' => '/static/admin/'
+        'style_directory' => '/static/admin/',
+        'session_prefix'  => 'abc_',  
   ]
 ~~~
+
 
 可以不配置  配置以后Js css文件需要放到配置的目录里
 
@@ -59,23 +67,23 @@
 
 ## 权限认证
 ~~~
-    public function __construct(\think\Request $request)
-    {
-        parent::__construct($request);
-        $this->request  = $request;
-        $auth     = new Auth();
-        $auth->noNeedCheckRules = ['index/index/index','index/index/home'];     //无需权限认证路由
-        $auth->log              = true;                                         // v1.1版本  日志开关默认true
-        $auth->admin            = $session['name'];                             // v1.1版本  管理员名称
-        $this->uid      = Session::get('admin.id');
-        if(!empty(Session::get('admin.name'))){//用户登录状态
-            if(!$auth->auth($this->uid)){ // 权限认证
-                return $this->error("你没有权限访问！");
+     public function __construct()
+        {
+            parent::__construct();
+            $auth                   = new Auth();
+            $auth->noNeedCheckRules = ['index/index/index','index/index/home'];
+            $auth->log              = true;                 // v1.1版本  日志开关默认true
+            $user                   = $auth::is_login();
+
+            if($user){//用户登录状态
+                $this->uid = $user['uid'];
+                if(!$auth->auth()){
+                    return $this->error("你没有权限访问！");
+                }
+            }else{
+                return $this->error("您还没有登录！",url("publics/login"));
             }
-        }else{
-            return $this->error("您还没有登录！",url("publics/login"));
         }
-    }
 ~~~
 这里在公共控制器上加入验证即可
 
