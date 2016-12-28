@@ -6,10 +6,12 @@ namespace thinkcms\auth\controller;
 
 use think\Cache;
 use think\Validate;
+use thinkcms\auth\Auth;
 use thinkcms\auth\library\Tree;
 use thinkcms\auth\model\ActionLog;
 use thinkcms\auth\model\AuthAccess;
 use thinkcms\auth\model\AuthRole;
+use thinkcms\auth\model\AuthRoleUser;
 use thinkcms\auth\model\Menu;
 
 class Rbac
@@ -292,55 +294,77 @@ class Rbac
         if(empty($this->id)){
             return false;
         }
-
-        $priv_data  = AuthAccess::where(["role_id"=>$this->id])->field("rule_name")->column('menu_id');
-
-
-
-        $tree       = new Tree();
-        foreach ($menu as $n => $t) {
-            $menu[$n]['checked']  = (in_array($t['id'], $priv_data)) ? ' checked' : '';
-            $menu[$n]['level']    = $tree->get_level($t['id'], $menu);
-            $menu[$n]['width']    = 100-$menu[$n]['level'];
-        }
-
-        $tree->init($menu);
-        $tree->text =[
-            'other' => "<label class='checkbox' data-original-title='' data-toggle=''>
-                        <input \$checked name='menuid[]' value='\$id' level='\$level' onclick='javascript:checknode(this);'type='checkbox'>
-                        \$name
-                   </label>",
-            '0' => [
-                '0' =>"<dl class='checkmod'>
-                    <dt class='hd'>
-                        <label class='checkbox' data-original-title='' data-toggle='tooltip'>
-                            <input \$checked name='menuid[]' value='\$id' level='\$level' onclick='javascript:checknode(this);'
-                             type='checkbox'>
-                            \$name
-                        </label>
-                    </dt>
-                    <dd class='bd'>",
-                '1' => "</dd></dl>",
-            ],
-            '1' => [
-                '0' => "
-                        <div class='menu_parent'>
-                            <label class='checkbox' data-original-title='' data-toggle='tooltip'>
-                                <input \$checked name='menuid[]' value='\$id' level='\$level'
-                                onclick='javascript:checknode(this);' type='checkbox'> \$name
-                            </label>
-                        </div>
-                        <div class='rule_check' style='width: \$width%;'>",
-
-                '1' => "</div><span class='child_row'></span>",
-            ]
-
-        ];
-
-        $info['html']   = $tree->get_authTree(0);
-        $info['id']     = $this->id;
+        $info = self::authorizeHtml($menu,'admin_url');
 
         return [VIEW_PATH.'authorize.php',array_merge($this->data,['info'=>$info])];
+    }
+    /**
+     *  管理员授权
+     */
+    public function adminAuthorize(){
+
+
+        $menu       = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
+
+        if($this->request->isPost()){//表单处理
+
+            $post   = $this->post;
+            $menuid = $post['menuid'];
+
+            if(empty($this->id)){
+                return ['code'=>0,'msg'=>'需要授权的角色不存在'];
+            }
+
+            AuthAccess::where(["role_id" => $this->id,'type'=>'admin'])->delete();
+
+            if (is_array($menuid) && count($menuid)>0) {
+                foreach ($menuid as $v) {
+
+                    $menus   = isset($menu[$v])?$menu[$v]:'';
+
+                    if($menus){
+                        $name   = strtolower("{$menus['app']}/{$menus['model']}/{$menus['action']}");
+                        $data[]   = [
+                            "role_id"   => $this->id,
+                            "rule_name" => $name,
+                            'type'      => 'admin',
+                            'menu_id'   => $v
+                        ];
+                    }
+                }
+
+                if(!empty($data)){
+                    $AuthAccess = new AuthAccess();
+                    if($AuthAccess->saveAll($data)){
+                        return ['code'=>1,'msg'=>'增加成功','url'=>''];
+                    }else{
+                        return ['code'=>0,'msg'=>'增加失败'];
+                    }
+                }
+
+            }else{
+                return ['code'=>0,'msg'=>'没有接收到数据，执行清除授权成功！'];
+            }
+        }//表单处理结束
+
+        if(empty($this->id)){
+            return false;
+        }
+
+        //管理员所有角色权限
+        $roleId     = AuthRoleUser::hasWhere('authRule')->where(['a.user_id'=>$this->id])->column('role_id');
+        if(in_array(1,$roleId)){
+            $AuthAccess = true;
+        }else if(empty($roleId)){
+            $AuthAccess = [];
+        }else{
+            $AuthAccess   = AuthAccess::where(["role_id"=>["in",$roleId]])->column('*','menu_id');
+        }
+
+
+        $info = self::authorizeHtml($menu,'admin',$AuthAccess);
+
+        return [VIEW_PATH.'adminAuthorize.php',array_merge($this->data,['info'=>$info])];
     }
 
     /**
@@ -420,6 +444,58 @@ class Rbac
         return ['code'=>1,'msg'=>'操作成功','url'=>url('auth/menu')];
     }
 
+    protected function authorizeHtml($menu,$type,$authMenu=[]){
+        $priv_data  = AuthAccess::where(['role_id'=>$this->id,'type'=>$type])->field("rule_name")->column('menu_id');
+        $tree       = new Tree();
+        foreach ($menu as $n => $t) {
+            $menu[$n]['checked']  = (in_array($t['id'], $priv_data)) ? ' checked' : '';
+            $menu[$n]['level']    = $tree->get_level($t['id'], $menu);
+            $menu[$n]['width']    = 100-$menu[$n]['level'];
+            $menu[$n]['disabled'] = isset($authMenu[$t['id']])||$authMenu===true?[0=>"style='display: none;'disabled=''",1=>'★']:[0=>'',
+                1=>''];
+
+        }
+
+        $tree->init($menu);
+        $tree->text =[
+            'other' => "<label class='checkbox' data-original-title='' data-toggle='' >
+                        <input \$checked \$disabled[0] name='menuid[]' value='\$id' level='\$level'
+                        onclick='javascript:checknode(this);'type='checkbox'>
+                       \$disabled[1] \$name
+                   </label>",
+            '0' => [
+                '0' =>"<dl class='checkmod'>
+                    <dt class='hd'>
+                        <label class='checkbox' data-original-title='' data-toggle='tooltip'>
+                            <input \$checked \$disabled[0] name='menuid[]' value='\$id' level='\$level'
+                             onclick='javascript:checknode(this);'
+                             type='checkbox'>
+                           \$disabled[1] \$name
+                        </label>
+                    </dt>
+                    <dd class='bd'>",
+                '1' => "</dd></dl>",
+            ],
+            '1' => [
+                '0' => "
+                        <div class='menu_parent'>
+                            <label class='checkbox' data-original-title='' data-toggle='tooltip'>
+                                <input \$checked \$disabled[0] name='menuid[]' value='\$id' level='\$level'
+                                onclick='javascript:checknode(this);' type='checkbox'>
+                                \$disabled[1] \$name
+                            </label>
+                        </div>
+                        <div class='rule_check' style='width: \$width%;'>",
+
+                '1' => "</div><span class='child_row'></span>",
+            ]
+
+        ];
+
+        $info['html']   = $tree->get_authTree(0);
+        $info['id']     = $this->id;
+        return $info;
+    }
 }
 
 /**

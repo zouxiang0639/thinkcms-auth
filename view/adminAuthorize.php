@@ -1,4 +1,5 @@
 <?php require $pach . 'public/top.php';?>
+
 <style>
     .checkmod{
         margin-bottom:20px;
@@ -44,16 +45,13 @@
 
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
-        {if condition="checkPath('auth/role')"}
-            <li><a href="<?php echo url('auth/role')?>">角色管理</a></li>
-        {/if}
-        {if condition="checkPath('auth/roleAdd')"}
-            <li><a href="<?php echo url('auth/roleAdd')?>">增加角色</a></li>
-        {/if}
-        <li class="active"><a href="">权限设置</a></li>
+        <li class="active"><a href="">{:input('name')}权限</a></li>
     </ul>
+    <div class="cf well form-search" style="height: 58px;">
+        <p>★已选中的角色权限      <input checked="checked"  type="checkbox">已选中的管理员权限</p>
+    </div>
 
-    <form class="form-horizontal"  action="{:Url('auth/authorize',['id'=>$info['id']])}" method="post">
+    <form class="form-horizontal"  action="{:url('auth/adminAuthorize',['id'=>$info['id']])}" method="post">
 
         <div class="table_full">
             <table width="100%" cellspacing="0" id="dnd-example">

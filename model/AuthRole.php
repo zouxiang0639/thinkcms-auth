@@ -26,7 +26,7 @@ class AuthRole extends \think\Model
     public function authRoleDelete(){
         if($this->delete()){
             if($this->authAccess){
-                AuthAccess::where(['role_id'=>$this->id])->delete();
+                AuthAccess::where(['role_id'=>$this->id,'type'=>'admin_url'])->delete();
             }
             return true;
         }

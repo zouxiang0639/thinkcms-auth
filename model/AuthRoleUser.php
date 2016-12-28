@@ -56,6 +56,7 @@ class AuthRoleUser extends \think\Model
      */
     public function authRoleUserDelete($user_id){
         self::where(['user_id'=>$user_id])->delete();
+        AuthAccess::where(['role_id'=>$user_id,'type'=>'admin'])->delete();
     }
 
 }

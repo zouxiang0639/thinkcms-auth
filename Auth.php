@@ -29,7 +29,6 @@ class Auth
     const  PATH                 = __DIR__;
     public $log                 = true;
     public $noNeedCheckRules    = [];           //不需要检查的路由规则
-    protected static $superAuth;        //是否超级权限
 
     public function __construct()
     {
@@ -103,10 +102,10 @@ class Auth
 
         if($uid==1 || !empty($authRoleUser)){
         }else{
-            $menu_id    = AuthRoleUser::hasWhere('authAccess')->field('b.*')->where(['a.user_id'=>$uid])->column('b.menu_id');
-            $where['id']=['in',$menu_id];
+            $menu_id        = AuthRoleUser::hasWhere('authAccess')->field('b.*')->where(['a.user_id'=>$uid,'b.type'=>'admin_url'])->column('b.menu_id','menu_id');
+            $adminMenu_id   = AuthAccess::where(['role_id'=>$uid,'type'=>'admin'])->column('menu_id','menu_id');
+            $where['id']=['in',array_merge($menu_id,$adminMenu_id)];
         }
-
         $menu       = Menu::where($where)->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
         return $menu;
     }
@@ -222,9 +221,9 @@ class Auth
         $path = strtolower($path);
 
         //是否为超级管理员角色
-        if(self::$superAuth === true ){
+        if($path === true ){
             return true;
-        }else if(self::$superAuth === false){
+        }else if($path === false){
             return false;
         }
 
@@ -262,11 +261,11 @@ class Auth
         $rules = self::authMenu(["b.name"=>["in",$rule]]);
 
         //是否为超级管理员角色
-        if(self::$superAuth === true){
+        if($rules === true){
             //行为日志
             self::actionLog($url);
             return true;
-        }else if(self::$superAuth === false){
+        }else if($rules === false){
             return false;
         }
 
@@ -314,14 +313,19 @@ class Auth
         $rule       = [];
         $roleId     = AuthRoleUser::hasWhere('authRule')->where(['a.user_id'=>$uid])->column('role_id');
         if(in_array(1,$roleId)){
-            self::$superAuth    = true;
+            return true;
         }else if(empty($roleId)){
-            self::$superAuth    = false;
+            return false;
         }else{
-            $where  = array_merge(["a.role_id"=>["in",$roleId]],$where);
-            $rule   = AuthAccess::hasWhere('authRule')->where($where)->column('*','menu_id');
+            $roleId     = implode(',',$roleId);
+
+            //角色权限 or 管理员权限
+            $rule       = AuthAccess::hasWhere('authRule')->where($where)
+                        ->where('(a.type="admin_url" and a.role_id in(:roleId))or(a.type="admin" and a.role_id =:uid)',['roleId'=>$roleId,
+                            'uid'=>$uid])
+                        ->column('*','menu_id');
         }
-        return $rule;
+        return array_merge($rule);
     }
 
     /**

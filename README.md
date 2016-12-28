@@ -55,7 +55,7 @@ checkPath($path 路由,$param 参数)       检查路由是否有权限
 ~~~
 在模块中创建一个Auth控制器，把_empty方法复制上去，这样就可以访问以下视图
 
-* /auth/role.html        角色列表 
+* /auth/role.html           角色列表
 * /auth/roleAdd.html        角色添加
 * /auth/roleEdit.html       角色修改
 * /auth/authorize/id/2.html 权限设置
@@ -65,6 +65,7 @@ checkPath($path 路由,$param 参数)       检查路由是否有权限
 * /auth/log.html            行为日志    新v1.1
 * /auth/viewLog.html        查看日志    新v1.1
 * /auth/clear.html          清空日志    新v1.1
+* /auth/adminAuthorize.html 独立权限    新v1.1.2
 
 ## 权限认证
 ~~~
@@ -88,6 +89,10 @@ checkPath($path 路由,$param 参数)       检查路由是否有权限
 ~~~
 这里在公共控制器上加入验证即可
 
+##管理员独立权限
+~~~
+ url('auth/adminAuthorize',['id' => '用户ID','name'=>'用户昵称'])
+~~~
 ## 授权菜单
 ~~~
  Auth::menuCheck();
