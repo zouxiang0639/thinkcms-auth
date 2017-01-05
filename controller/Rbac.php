@@ -352,7 +352,7 @@ class Rbac
         }
 
         //管理员所有角色权限
-        $roleId     = AuthRoleUser::hasWhere('authRule')->where(['a.user_id'=>$this->id])->column('role_id');
+        $roleId     = AuthRoleUser::hasWhere('authRule')->where(['a.user_id'=>$this->id,'b.status'=>1])->column('role_id');
         if(in_array(1,$roleId)){
             $AuthAccess = true;
         }else if(empty($roleId)){

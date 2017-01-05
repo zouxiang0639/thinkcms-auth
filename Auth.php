@@ -96,17 +96,17 @@ class Auth
         if(empty($uid)){
             return false;
         }
-
-        $authRoleUser = AuthRoleUser::where(['user_id'=>$uid,'role_id'=>1])->find();
         $where['status'] = 1;
 
-        if($uid==1 || !empty($authRoleUser)){
-        }else{
-            $menu_id        = AuthRoleUser::hasWhere('authAccess')->field('b.*')->where(['a.user_id'=>$uid,'b.type'=>'admin_url'])->column('b.menu_id','menu_id');
-            $adminMenu_id   = AuthAccess::where(['role_id'=>$uid,'type'=>'admin'])->column('menu_id','menu_id');
-            $where['id']=['in',array_merge($menu_id,$adminMenu_id)];
+        if($uid != 1){
+            $authMenu        = self::authMenu('',false);
+            if(array($authMenu)){ //授权菜单ID
+               $where['id']=['in',array_keys($authMenu)];
+            }
         }
+
         $menu       = Menu::where($where)->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
+
         return $menu;
     }
 
@@ -207,7 +207,7 @@ class Auth
 
         $authMenu   = Cache::get('authMenu_'.$uid);
 
-        if(!$authMenu){ //存入缓存
+        if(!$authMenu){ //存入缓存 授权菜单
             $authMenu   = self::authMenu();
             Cache::set('authMenu_'.$uid,$authMenu,600);
         }
@@ -306,26 +306,35 @@ class Auth
      * 权限访问清单
      * @access private
      * @param array     $where 查询附加条件
+     * @param bool      $default  隐藏的菜单
      * @return array
      */
-    private static function authMenu($where=[]){
+    private static function authMenu($where=[],$default = true){
         $uid        = self::sessionGet('user.uid');
         $rule       = [];
-        $roleId     = AuthRoleUser::hasWhere('authRule')->where(['a.user_id'=>$uid])->column('role_id');
+        $roleId     = AuthRoleUser::hasWhere('authRule')->where(['a.user_id'=>$uid,'b.status'=>1])->column('role_id');
+
         if(in_array(1,$roleId)){
             return true;
-        }else if(empty($roleId)){
-            return false;
-        }else{
-            $roleId     = implode(',',$roleId);
-
-            //角色权限 or 管理员权限
-            $rule       = AuthAccess::hasWhere('authRule')->where($where)
-                        ->where('(a.type="admin_url" and a.role_id in(:roleId))or(a.type="admin" and a.role_id =:uid)',['roleId'=>$roleId,
-                            'uid'=>$uid])
-                        ->column('*','menu_id');
         }
-        return array_merge($rule);
+        $roleId     = implode(',',$roleId);
+        //角色权限 or 管理员权限
+        if($default === true){
+            $rule       = AuthAccess::hasWhere('authRule')->where($where)
+                ->where('(a.type="admin_url" and a.role_id in(:roleId))or(a.type="admin" and a.role_id =:uid)',['roleId'=>$roleId,
+                    'uid'=>$uid]);
+        }else if($default === false){
+            $rule       = AuthAccess::where($where)
+                ->where('(type="admin_url" and role_id in(:roleId))or(type="admin" and role_id =:uid)',['roleId'=>$roleId,
+                    'uid'=>$uid]);
+        }
+
+        $rule = $rule->column('*','menu_id');
+
+        if(empty($rule)){
+            return false;
+        }
+        return $rule;
     }
 
     /**
