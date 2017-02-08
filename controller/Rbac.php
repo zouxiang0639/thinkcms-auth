@@ -254,7 +254,7 @@ class Rbac
         if($this->request->isPost()){//表单处理
 
             $post   = $this->post;
-            $menuid = $post['menuid'];
+            $menuid = isset($post['menuid']) ? $post['menuid'] : [];;
 
             if(empty($this->id)){
                 return ['code'=>0,'msg'=>'需要授权的角色不存在'];
@@ -310,7 +310,7 @@ class Rbac
         if($this->request->isPost()){//表单处理
 
             $post   = $this->post;
-            $menuid = $post['menuid'];
+            $menuid = isset($post['menuid']) ? $post['menuid'] : [];
 
             if(empty($this->id)){
                 return ['code'=>0,'msg'=>'需要授权的角色不存在'];

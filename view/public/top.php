@@ -7,7 +7,7 @@
         if(empty($directory)){
             return url('auth/openFile',['file'=>$file]);
         }else{
-            $file       = strtr($file, '_', DS);
+            $file       = strtr($file, '_', '/');
             return $directory.$file;
         }
 
