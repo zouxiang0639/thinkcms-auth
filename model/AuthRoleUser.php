@@ -26,6 +26,19 @@ class AuthRoleUser extends \think\Model
     }
 
     /**
+     * innerAuthRole 全连 auth_role表 返回roleId
+     * @param int     $uid   用户ID
+     * @return array
+     */
+    public static function innerAuthRole($uid)
+    {
+       return AuthRoleUser::alias('AuthRoleUser')
+            ->join('__AUTH_ROLE__ AuthRole','AuthRoleUser.role_id = AuthRole.id')
+            ->where(['AuthRoleUser.user_id'=>$uid,'AuthRole.status'=>1])
+            ->column('role_id');
+    }
+
+    /**
      * 加入角色权限
      * @param array     $role_id   角色ID
      * @param int     $user_id   用户ID

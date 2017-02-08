@@ -258,7 +258,7 @@ class Auth
         $list   = []; //保存验证通过的规则名)
         $param  = $this->param;
 
-        $rules = self::authMenu(["b.name"=>["in",$rule]]);
+        $rules = self::authMenu(["AuthRule.name"=>["in",$rule]]);
 
         //是否为超级管理员角色
         if($rules === true){
@@ -312,7 +312,7 @@ class Auth
     private static function authMenu($where=[],$default = true){
         $uid        = self::sessionGet('user.uid');
         $rule       = [];
-        $roleId     = AuthRoleUser::hasWhere('authRule')->where(['a.user_id'=>$uid,'b.status'=>1])->column('role_id');
+        $roleId     = AuthRoleUser::innerAuthRole($uid);
 
         if(in_array(1,$roleId)){
             return true;
@@ -320,16 +320,12 @@ class Auth
         $roleId     = implode(',',$roleId);
         //角色权限 or 管理员权限
         if($default === true){
-            $rule       = AuthAccess::hasWhere('authRule')->where($where)
-                ->where('(a.type="admin_url" and a.role_id in(:roleId))or(a.type="admin" and a.role_id =:uid)',['roleId'=>$roleId,
-                    'uid'=>$uid]);
+            $rule   = AuthAccess::innerAuthRule($roleId,$uid,$where);
         }else if($default === false){
             $rule       = AuthAccess::where($where)
                 ->where('(type="admin_url" and role_id in(:roleId))or(type="admin" and role_id =:uid)',['roleId'=>$roleId,
-                    'uid'=>$uid]);
+                    'uid'=>$uid])->column('*','menu_id');;
         }
-
-        $rule = $rule->column('*','menu_id');
 
         if(empty($rule)){
             return false;

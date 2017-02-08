@@ -5,6 +5,7 @@ namespace thinkcms\auth\controller;
 
 
 use think\Cache;
+use think\Config;
 use think\Validate;
 use thinkcms\auth\Auth;
 use thinkcms\auth\library\Tree;
@@ -352,7 +353,7 @@ class Rbac
         }
 
         //管理员所有角色权限
-        $roleId     = AuthRoleUser::hasWhere('authRule')->where(['a.user_id'=>$this->id,'b.status'=>1])->column('role_id');
+        $roleId     = AuthRoleUser::innerAuthRole($this->id);
         if(in_array(1,$roleId)){
             $AuthAccess = true;
         }else if(empty($roleId)){
@@ -398,6 +399,7 @@ class Rbac
      * 日志列表
      */
     public function log(){
+
         $where  = [];
         $param  = $this->param;
         if(!empty($param['username'])){

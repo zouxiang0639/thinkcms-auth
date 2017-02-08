@@ -38,7 +38,11 @@
         <tr>
             <th>执行时间</th>
             <td>
+                {if condition="is_int($info['create_time'])"}
                 {:date('Y-m-d H:i:s',$info['create_time'])}
+                {else /}
+                {$info['create_time']}
+                {/if}
             </td>
         </tr>
 

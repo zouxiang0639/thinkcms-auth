@@ -50,7 +50,14 @@
                     <td>{$v.username}</td>
                     <td>{$v.log_url}</td>
                     <td>{$v.action_ip}</td>
-                    <th>{:date('Y-m-d H:i:s',$v['create_time'])}</th>
+
+                    <th>
+                        {if condition="is_int($v['create_time'])"}
+                            {:date('Y-m-d H:i:s',$v['create_time'])}
+                        {else /}
+                            {$v['create_time']}
+                        {/if}
+                    </th>
                     <td>
                         {if condition="checkPath('auth/viewlog',['id'=>$v['id']])"}
                             <a href="{:url('auth/viewlog',['id'=>$v['id']])}">详细</a>
