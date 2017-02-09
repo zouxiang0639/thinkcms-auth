@@ -7,7 +7,6 @@ namespace thinkcms\auth\controller;
 use think\Cache;
 use think\Config;
 use think\Validate;
-use thinkcms\auth\Auth;
 use thinkcms\auth\library\Tree;
 use thinkcms\auth\model\ActionLog;
 use thinkcms\auth\model\AuthAccess;
@@ -33,7 +32,8 @@ class Rbac
     /**
      * 菜单and权限列表
      */
-    public function menu(){
+    public function menu()
+    {
         $result     = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
         $tree       = new Tree();
         $tree->nbsp = '&nbsp;&nbsp;&nbsp;';
@@ -69,7 +69,8 @@ class Rbac
     /**
      * 菜单and权限 修改
      */
-    public function menuEdit(){
+    public function menuEdit()
+    {
 
         $post   = $this->post;
         $info   = Menu::get($this->id);
@@ -100,7 +101,8 @@ class Rbac
     /**
      * 菜单and权限 增加
      */
-    public function menuAdd(){
+    public function menuAdd()
+    {
         $parent_id  = isset($this->param['parent_id'])?$this->param['parent_id']:'';
 
         if($this->request->isPost()){
@@ -125,7 +127,8 @@ class Rbac
     /**
      * 菜单and权限 删除
      */
-    public function menuDelete(){
+    public function menuDelete()
+    {
         if($this->request->isPost()){
             $result   = Menu::get($this->id);
 
@@ -147,7 +150,8 @@ class Rbac
     /**
      * 菜单 排序
      */
-    public function menuOrder(){
+    public function menuOrder()
+    {
         if($this->request->isPost()) {
             $order  = isset($this->param['order'])?intval($this->param['order']):'';
             $result = Menu::get($this->id);
@@ -175,7 +179,8 @@ class Rbac
     /**
      * 角色修改
      */
-    public function roleEdit(){
+    public function roleEdit()
+    {
 
         $post   = $this->post;
         $info   = AuthRole::get($this->id);
@@ -204,7 +209,8 @@ class Rbac
     /**
      * 角色增加
      */
-    public function roleAdd(){
+    public function roleAdd()
+    {
 
         //post 数据处理
         if($this->request->isPost()){
@@ -225,7 +231,8 @@ class Rbac
         return [VIEW_PATH.'roleAdd.php',$this->data];
     }
 
-    public function roleDelete(){
+    public function roleDelete()
+    {
         if($this->request->isPost()){
             $result   = AuthRole::get($this->id);
 
@@ -234,8 +241,10 @@ class Rbac
             }else if(empty($result)){
                 return ['code'=>0,'msg'=>'没有数据'];
             }
-
-            if($result->authRoleDelete()){
+            $delete = $result->authRoleDelete();
+            if(is_string($delete)){
+                return ['code'=>0,'msg'=>$delete];
+            }else if($delete === true){
                 return ['code'=>1,'msg'=>'删除成功','url'=>url('auth/role')];
             }else{
                 return ['code'=>0,'msg'=>'删除失败'];
@@ -246,7 +255,8 @@ class Rbac
     /**
      * 角色授权
      */
-    public function authorize(){
+    public function authorize()
+    {
 
 
         $menu       = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
@@ -302,9 +312,8 @@ class Rbac
     /**
      *  管理员授权
      */
-    public function adminAuthorize(){
-
-
+    public function adminAuthorize()
+    {
         $menu       = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
 
         if($this->request->isPost()){//表单处理
@@ -371,7 +380,8 @@ class Rbac
     /**
      * 注册样式文件
      */
-    public function openFile(){
+    public function openFile()
+    {
 
         $text       = '';
         $file       = strtr($this->param['file'], '_', DS);
@@ -398,8 +408,8 @@ class Rbac
     /**
      * 日志列表
      */
-    public function log(){
-
+    public function log()
+    {
         $where  = [];
         $param  = $this->param;
         if(!empty($param['username'])){
@@ -423,7 +433,8 @@ class Rbac
     /**
      * 日志详情
      */
-    public function viewLog(){
+    public function viewLog()
+    {
         $info   = ActionLog::get($this->id);
         return [VIEW_PATH.'viewLog.php',array_merge($this->data,['info'=>$info])];
     }
@@ -431,7 +442,8 @@ class Rbac
     /**
      * 清空日志
      */
-    public function clear(){
+    public function clear()
+    {
         if(ActionLog::where('1=1')->delete()){
             return ['code'=>1,'msg'=>'数据已清空','url'=>url('auth/log')];
         }
@@ -441,12 +453,14 @@ class Rbac
     /**
      * 清除缓存
      */
-    public function cache(){
+    public function cache()
+    {
         Cache::rm('logMenu');
         return ['code'=>1,'msg'=>'操作成功','url'=>url('auth/menu')];
     }
 
-    protected function authorizeHtml($menu,$type,$authMenu=[]){
+    protected function authorizeHtml($menu,$type,$authMenu=[])
+    {
         $priv_data  = AuthAccess::where(['role_id'=>$this->id,'type'=>$type])->field("rule_name")->column('menu_id');
         $tree       = new Tree();
         foreach ($menu as $n => $t) {
@@ -505,7 +519,8 @@ class Rbac
  * @param int   $selected       默认id
  * @return mixed
  */
-function menu($selected = 1){
+function menu($selected = 1)
+{
     $array = '';
     $result = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
 
