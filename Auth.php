@@ -13,7 +13,6 @@ namespace thinkcms\auth;
 defined('VIEW_PATH') or define('VIEW_PATH', __DIR__ . DS.'view'. DS);
 
 use think\Cache;
-
 use think\Config;
 use think\Loader;
 use think\Request;
@@ -332,6 +331,7 @@ class Auth
         }
         return $rule;
     }
+
 
     /**
      * 检测用户是否登录

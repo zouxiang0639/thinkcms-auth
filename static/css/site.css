@@ -13,4 +13,6 @@ a{color: #1abc9c;}
 .toggle {text-align: center;}
 .toggle img{cursor: pointer	}
 .span-text{float: left;padding-top: 9px;padding-left: 10px;padding-right: 10px;}
+.fl {float: left !important;}
+.fr {float: right !important;}
 
