@@ -87,7 +87,7 @@ class Rbac
                 return ['code'=>0,'msg'=>$validate->getError()];
             }
 
-            if($info->menuEdit($post)){
+            if($info->save($post)){
                 return ['code'=>1,'msg'=>'修改成功','url'=>url('auth/menu')];
             }else{
                 return ['code'=>0,'msg'=>'修改失败'];
@@ -112,8 +112,7 @@ class Rbac
             if (!$validate->check($post)) {
                 return ['code'=>0,'msg'=>$validate->getError()];
             }
-            $menu   = new Menu();
-            if($menu->menuAdd($post)){
+            if(Menu::create($post)){
                 return ['code'=>1,'msg'=>'增加成功','url'=>url('auth/menu')];
             }else{
                 return ['code'=>0,'msg'=>'增加失败'];
@@ -138,7 +137,7 @@ class Rbac
                 return ['code'=>0,'msg'=>'有子目录不可删除'];
             };
 
-            if($result->menuDelete($this->id)){
+            if($result->delete()){
                 return ['code'=>1,'msg'=>'删除成功','url'=>url('auth/menu')];
             }else{
                 return ['code'=>0,'msg'=>'删除失败'];

@@ -177,8 +177,8 @@ class Auth
         $param  = $this->param;
         $condition = '';
         $command   = preg_replace('/\{(\w*?)\}/', '{$param[\'\\1\']}', $logrule);
-        @(eval('$condition=("' . $command . '");'));
-
+        @(eval('$condition= (string)("' . $command . '");'));
+        //dump($condition);die;
         $data   = [
             'action_ip'     => ip2long($this->request->ip()),
             'username'      => self::sessionGet('user.nickname'),

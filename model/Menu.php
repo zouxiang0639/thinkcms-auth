@@ -45,13 +45,18 @@ class Menu extends \think\Model
 
 
     /**
-     * 关联 authRule模型 修改
-     * @param array     $param   参数
-     * @return bool
+     * 保存当前数据对象
+     * 关联 authRule模型 保存当前数据对象
+     * @access public
+     * @param array  $data     数据
+     * @param array  $where    更新条件
+     * @param string $sequence 自增序列名
+     * @return integer|false
      */
-    public function menuEdit($param){
+    public function save($data = [], $where = [], $sequence = null)
+    {
 
-        if($this->save($param)){
+        if(parent::save($data, $where, $sequence)){
             $authRule = $this->authRule;
 
             if($this->data['action'] == 'default' ||$this->data['type'] == 0) {//判断他们是否需要加入权限
@@ -84,13 +89,19 @@ class Menu extends \think\Model
         return false;
     }
 
+
     /**
-     * 关联 authRule模型 增加
-     * @param array     $param   参数
-     * @return bool
+     * 写入数据
+     * 关联 authRule模型 写入数据
+     * @access public
+     * @param array      $data  数据数组
+     * @param array|true $field 允许字段
+     * @return $this
      */
-    public function menuAdd($param){
-        $auth = $this->create($param);
+    public static function create($data = [], $field = null)
+    {
+        $auth = parent::create($data, $field);
+
         if($auth){
 
             $name   = strtolower("{$auth->data['app']}/{$auth->data['model']}/{$auth->data['action']}");
@@ -105,18 +116,19 @@ class Menu extends \think\Model
             ];
 
             AuthRule::create($authRule);
-            return true;
+            return $auth;
         }
         return false;
     }
 
     /**
-     * 关联 authRule模型 删除
-     * @param int     $id   参数
-     * @return bool
+     * 删除当前的记录
+     * 关联 authRule模型 删除当前的记录
+     * @access public
+     * @return integer
      */
-    public function menuDelete(){
-        if($this->delete()){
+    public function delete(){
+        if(parent::delete()){
             if($this->authRule){
                 $this->authRule->authRuleDelete();
             }
