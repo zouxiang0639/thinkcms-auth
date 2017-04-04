@@ -27,11 +27,16 @@ class AuthAccess extends \think\Model
      */
     public static function innerAuthRule($roleId,$uid,$where=[])
     {
+
         return AuthAccess::alias('AuthAccess')
-            ->join('__AUTH_RULE__ AuthRule','AuthAccess.menu_id = AuthRule.menu_id')
+            ->join('__MENU__ Menu','AuthAccess.menu_id = Menu.id')
             ->where($where)
-            ->where('(AuthAccess.type="admin_url" and AuthAccess.role_id in(:roleId))or(AuthAccess.type="admin" and AuthAccess.role_id =:uid)',['roleId'=>$roleId,'uid'=>$uid])
+            ->where('(AuthAccess.type="admin_url" and AuthAccess.role_id in(:roleId))or(AuthAccess.type="admin" and AuthAccess.role_id =:uid)', [
+                'roleId'    => $roleId,
+                'uid'       => $uid
+            ])
             ->column('*','menu_id');
+
     }
 }
 ?>
