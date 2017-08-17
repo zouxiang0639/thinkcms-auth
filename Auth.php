@@ -228,7 +228,7 @@ class Auth
 
         //验证路由
         foreach ($authMenu as $v){
-            if($v['name'] == $path){
+            if($v['rule_name'] == $path){
                 if(empty($v['rule_param'])){  //验证规则为空,表示所有通过
                     return true;
                 }else{                       //如有验证规则,根据规则验证
