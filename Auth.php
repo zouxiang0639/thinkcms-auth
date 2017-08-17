@@ -99,7 +99,8 @@ class Auth
 
         if($uid != 1){
             $authMenu        = self::authMenu('',false);
-            if(array($authMenu)){ //授权菜单ID
+
+            if(is_array($authMenu)){
                $where['id']=['in',array_keys($authMenu)];
             }
         }
@@ -177,8 +178,8 @@ class Auth
         $param  = $this->param;
         $condition = '';
         $command   = preg_replace('/\{(\w*?)\}/', '{$param[\'\\1\']}', $logrule);
-        @(eval('$condition=("' . $command . '");'));
-
+        @(eval('$condition= (string)("' . $command . '");'));
+        //dump($condition);die;
         $data   = [
             'action_ip'     => ip2long($this->request->ip()),
             'username'      => self::sessionGet('user.nickname'),
@@ -226,6 +227,11 @@ class Auth
             return false;
         }
 
+        //超级管理员角色跳过路由验证
+        if($authMenu === true){
+            return true;
+        }
+
         //验证路由
         foreach ($authMenu as $v){
             if($v['rule_name'] == $path){
@@ -241,6 +247,9 @@ class Auth
                 }
             }
         }
+
+
+
         return false;
     }
 
@@ -257,7 +266,7 @@ class Auth
         $list   = []; //保存验证通过的规则名)
         $param  = $this->param;
 
-        $rules = self::authMenu(["AuthRule.name"=>["in",$rule]]);
+        $rules = self::authMenu(["AuthAccess.rule_name"=>["in",$rule]]);
 
         //是否为超级管理员角色
         if($rules === true){
@@ -320,10 +329,15 @@ class Auth
         //角色权限 or 管理员权限
         if($default === true){
             $rule   = AuthAccess::innerAuthRule($roleId,$uid,$where);
+           // dump($rule);die;
         }else if($default === false){
+
             $rule       = AuthAccess::where($where)
-                ->where('(type="admin_url" and role_id in(:roleId))or(type="admin" and role_id =:uid)',['roleId'=>$roleId,
-                    'uid'=>$uid])->column('*','menu_id');;
+                ->where('(type="admin_url" and role_id in(:roleId))or(type="admin" and role_id =:uid)', [
+                    'roleId'    => $roleId,
+                    'uid'       => $uid
+                ])
+                ->column('*','menu_id');
         }
 
         if(empty($rule)){
