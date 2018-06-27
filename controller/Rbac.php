@@ -22,6 +22,7 @@ class Rbac
     private $id;
     public function __construct($request)
     {
+
         $this->request  = $request;
         $this->param    = $this->request->param();
         $this->post     = $this->request->post();
@@ -171,6 +172,7 @@ class Rbac
      * 角色列表
      */
     public function role(){
+
         $data = AuthRole::all();
         return [VIEW_PATH.'role.php',array_merge($this->data,['list'=>$data])];
     }
@@ -367,7 +369,9 @@ class Rbac
         }else if(empty($roleId)){
             $AuthAccess = [];
         }else{
-            $AuthAccess   = AuthAccess::where(["role_id"=>["in",$roleId]])->column('*','menu_id');
+
+            $AuthAccess   = AuthAccess::where("role_id" ,'in',$roleId)->column('*','menu_id');
+
         }
 
 
@@ -382,8 +386,7 @@ class Rbac
     public function openFile()
     {
 
-        $text       = '';
-        $file       = strtr($this->param['file'], '_', DS);
+        $file       = strtr($this->param['file'], '_', '/');
         $extension  = substr(strrchr($file, '.'), 1);
 
         switch ($extension)
@@ -399,6 +402,7 @@ class Rbac
         }
 
         $pach = VIEW_PATH.'../static/'.$file;
+
         $file = file_get_contents($pach);
 
         return ['file'=>response($file, 200, ['Content-Length' => strlen($file)])->contentType($text)];
@@ -454,7 +458,7 @@ class Rbac
      */
     public function cache()
     {
-        Cache::rm('logMenu');
+        cache('logMenu', '');
         return ['code'=>1,'msg'=>'操作成功','url'=>url('auth/menu')];
     }
 
@@ -520,7 +524,7 @@ class Rbac
  */
 function menu($selected = 1)
 {
-    $array = '';
+    $array = [];
     $result = Menu::where('')->order(["list_order" => "asc",'id'=>'asc'])->column('*','id');
 
     $tree = new Tree();

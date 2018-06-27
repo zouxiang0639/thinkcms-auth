@@ -118,7 +118,6 @@ $type    = isset($info['type'])?$info['type']:'';
 
 
 <div class="form-actions col-sm-12">
-    <input type="submit">
     <button type="button" class="btn btn-primary ajax-post " autocomplete="off">
         保存
     </button>

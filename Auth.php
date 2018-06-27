@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------
 namespace thinkcms\auth;
 
-defined('VIEW_PATH') or define('VIEW_PATH', __DIR__ . DS.'view'. DS);
+defined('VIEW_PATH') or define('VIEW_PATH', __DIR__ . '/view/');
 
 use think\Cache;
 use think\Config;
@@ -31,7 +31,8 @@ class Auth
 
     public function __construct()
     {
-        $this->request      = Request::instance();
+        $this->request      = request();
+
         $this->param        = $this->request->param();
         $this->module       = $this->request->module();
         $this->controller   = $this->request->controller();
@@ -124,10 +125,10 @@ class Auth
             return true;
         }
 
-        $logMenu    = Cache::get('logMenu');
+        $logMenu    = Cache('logMenu');
         if(empty($logMenu)){    //缓存日志24小时
             $logMenu    = Menu::actionLogMenu();
-            Cache::set('logMenu',$logMenu,86400);
+            Cache('logMenu',$logMenu,86400);
         }
 
         $menu       =   isset($logMenu[$rule])?$logMenu[$rule]:'';
@@ -371,15 +372,14 @@ class Auth
         if(empty($uid) && empty($nickname)){
             return false;
         }
-        $session_prefix = Config::get('thinkcms.session_prefix');
+        $session_prefix = config('thinkcms.session_prefix');
         $user           = [
                             'uid'       => $uid,
                             'nickname'  => $nickname,
                             'time'      => time()
                         ];
-
-        Session::set($session_prefix.'user',$user);
-        Session::set($session_prefix.'user_sign',self::data_auth_sign($user));
+        session($session_prefix.'user', $user);
+        session($session_prefix.'user_sign', self::data_auth_sign($user));
         return true;
     }
 
@@ -389,9 +389,9 @@ class Auth
      * @return bool
      */
     public static function logout(){
-        $session_prefix = Config::get('thinkcms.session_prefix');
-        Session::delete($session_prefix.'user');
-        Session::delete($session_prefix.'user_sign');
+        $session_prefix = config('thinkcms.session_prefix');
+        session($session_prefix.'user', '');
+        session($session_prefix.'user_sign', '');
         return true;
     }
 
@@ -415,8 +415,8 @@ class Auth
      * @return mixed
      */
     private static function sessionGet($path =''){
-        $session_prefix = Config::get('thinkcms.session_prefix');
-        $user           = Session::get($session_prefix.$path);
+        $session_prefix = config('thinkcms.session_prefix');
+        $user           = session($session_prefix.$path);
         return $user;
     }
 
